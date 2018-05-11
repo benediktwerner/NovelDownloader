@@ -6,29 +6,40 @@ import os
 
 SLEEP_BETWEEN_DOWNLOADS = 1
 
-#ARTICLE_START = '<div class="fr-view">'
-#ARTICLE_END = '<a href="/novel/'
-ARTICLE_START = '<div class="chapter-body hyphenate" v-pre>'
-ARTICLE_END = '<nav>'
+ARTICLE_SEPERATORS = {
+    "wuxiaworld": {
+        "start": '<div class="fr-view">',
+        "end": '<a href="/novel/'
+    },
+    "lnmtl": {
+        "start": '<div class="chapter-body hyphenate" v-pre>',
+        "end": '<nav>'
+    }
+}
 
 class DownloadException(Exception):
     pass
 
-def download_chapter(url, file_path):
+def download_chapter(url, file_path, config):
     # print("Downloading chapter from:", url)
     content = utils.download_url(url)
     if content is None:
         raise DownloadException("Failed to download chapter from {}".format(url))
     
-    article_start = content.find(ARTICLE_START)
-    article_end = content.find(ARTICLE_END, article_start)
+    article_start = content.find(ARTICLE_SEPERATORS[config["website"]]["start"])
+    article_end = content.find(ARTICLE_SEPERATORS[config["website"]]["end"], article_start)
     if article_end <= article_start:
-        raise DownloadException("Empty chapter")
+        raise DownloadException("Empty chapter! ({}, {}, {})".format(article_start, article_end, url))
     
     if article_start == -1 or article_end == -1:
+        utils.ensure_dir("dumps")
+        with open("dumps/content.html", "w") as f:
+            f.write(content)
+        if "Chapter visible only for logged in users" in content:
+            raise DownloadException("You must be logged in to view this chapter")
         raise DownloadException("Start or end of chapter not found! ({}, {})".format(article_start, article_end))
     
-    article = content[article_start+len(ARTICLE_START):article_end]
+    article = content[article_start+len(ARTICLE_SEPERATORS[config["website"]]["start"]):article_end]
     with open(file_path, "bw") as f:
         f.write(article.encode("utf-8"))
 
@@ -70,7 +81,7 @@ def download_chapters(chapter_start, chapter_end, book, config):
         
         file_path = os.path.join(raw_dir, file_name + ".html")
         
-        next_chapter_url = download_chapter(url, file_path)
+        next_chapter_url = download_chapter(url, file_path, config)
         time.sleep(SLEEP_BETWEEN_DOWNLOADS)
 
     progress.finish()

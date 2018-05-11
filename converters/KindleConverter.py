@@ -31,6 +31,8 @@ class KindleConverter(BookConverter):
                     continue
                 
                 progress.update()
+                if self.config.get("add_chapter_titles", False):
+                    f.write("Chapter {}\n\n".format(ch).encode())
                 f.write(self.process_chapter(ch).encode())
 
                 if ch != chapter_end:
@@ -59,6 +61,7 @@ class KindleConverter(BookConverter):
         text = text.replace("&#8220;", "“")
         text = text.replace("&#8221;", "”")
         text = text.replace("&#8216;", "‘")
+        text = text.replace("&hellip;", "…")
         text = re.sub(r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL)
         text = text.replace("</sentence>", "\n\n")
 
@@ -82,7 +85,7 @@ class KindleConverter(BookConverter):
 
         # Clean leftover tags
         text = re.sub(r"<.*?>", "", text)
-        
+
         return text.strip()
 
 

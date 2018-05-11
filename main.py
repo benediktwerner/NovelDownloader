@@ -24,23 +24,28 @@ def main():
     if utils.input_yes_no("Do you want to download chapters?"):
         print("Which chapters do you want to download?")
         chapter_start = utils.input_int("First chapter? ")
-        chapter_end = utils.input_int("Last chapter? ")
+        chapter_end = utils.input_int("Last chapter? ", chapter_start)
 
         try:
             downloader.download_chapters(chapter_start, chapter_end, book, config)
         except downloader.DownloadException as e:
-            print("ERROR:", e)
+            print("\nERROR:", e)
+            return
+        except:
+            print()
+            raise
         
         if not utils.input_yes_no("Do you also want to convert chapters?"):
             return
-        print()
     
+    print("\nWhich chapters do you want to convert?")
+
     if "volumes" in config and utils.input_yes_no("Select by volume instead of chapters?"):
         volume = utils.input_int("Which volume? ", 1, len(config["volumes"]))
         chapter_range = utils.get_chapters_from_volume(volume, config["volumes"])
     else:
         chapter_start = utils.input_int("First chapter? ")
-        chapter_end = utils.input_int("Last chapter? ")
+        chapter_end = utils.input_int("Last chapter? ", chapter_start)
         chapter_range = (chapter_start, chapter_end)
     
     print("\nBook converters:")
@@ -52,4 +57,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nInterrupted by Ctrl-C")

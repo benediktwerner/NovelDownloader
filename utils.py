@@ -16,11 +16,18 @@ CHAPTER_NAMES_FILE_NAME = "chapter-names.txt"
 
 MISSING_CHAPTER_NAME = "X"
 
-DEFAULT_BASE_URL = "https://www.wuxiaworld.com"
+DEFAULT_WEBSITE = "wuxiaworld"
 DEFAULT_FOLLOW_LINKS = False
+BASE_URLS = {
+    "wuxiaworld": "https://www.wuxiaworld.com",
+    "lnmtl": "https://lnmtl.com"
+}
 
 def download_url(url):
-    header = {"User-Agent":'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7'}
+    header = {
+        "User-Agent":'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7',
+        "Cookie":"cookieconsent_status=dismiss; remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d=eyJpdiI6IjRWY1RGbmd0VU51elBuMlRrMlhUdnc9PSIsInZhbHVlIjoiMTZNODlGdHVKa0QrMHdaUjlkMnczWVdnNFpGT3FkdTFjek5CaEZMOXk5eEpWNmxTN0tlZmx5a0VxNFwvSXdcL1N0dkFhOEpJRFBia0s5Ymd0cUF3cHc2QUlYb1RpZVg2aVdab0ZkVWwraGMyST0iLCJtYWMiOiI3MmI5ODk4ZTM3NTg1ZDM0NTdkZmE5NTU2MWMxNTE4MWQxMWU0N2E2Mzk2OTgxZmQ0OTg5ODFlYTJiNjQzYmQyIn0%3D"
+        }
     req = urllib.Request(url, headers=header)
     try:
         page = urllib.urlopen(req)
@@ -69,7 +76,7 @@ def load_chapter_names(book):
 def add_chapter_name(chapter_names, number, name):
     len_plus_one = len(chapter_names) + 1
     if number > len_plus_one:
-        for i in range(number - len_plus_one - 1):
+        for _ in range(number - len_plus_one - 1):
             chapter_names.append(None)
         chapter_names.append(name)
     elif number == len_plus_one:
@@ -100,10 +107,10 @@ def create_config(book):
 
     print("\nCreating new config:")
     
-    config["base_url"] = add_protocol(input("Base url? "))
-    if not config["base_url"]:
-        config["base_url"] = DEFAULT_BASE_URL
-    config["url"] = add_protocol(input("Url? (Use {volume}, {chapter}, {base_url}, {chapter_name}) "))
+    config["website"] = input("Website? (wuxiaworld, lnmtl) ")
+    if not config["website"]:
+        config["website"] = DEFAULT_WEBSITE
+    config["url"] = add_protocol(input("Url? (Use {volume}, {chapter}, {chapter_name}) "))
 
     if input_yes_no("Follow links?", False):
         config["follow_links"] = True
@@ -118,14 +125,22 @@ def create_config(book):
     name = input("Name? ")
     if name:
         config["name"] = name
+
+    add_chapter_titles = input_yes_no("Add chapter titles?", False)
+    if add_chapter_titles:
+        config["add_chapter_titles"] = True
     
     with open(get_config_file(book), "w") as f:
         yaml.dump(config, f, default_flow_style=False)
     print("Config created at:", get_config_file(book), end="\n\n")
 
 def add_protocol(url):
+    if url.startswith("/"):
+        url = "{base_url}" + url
     if not url.startswith("http") and not url.startswith("{base_url}"):
-        return "https://" + url
+        url = "https://" + url
+        print("Added protocol:", url)
+    return url
 
 def input_yes_no(text, default=True):
     text = text.rstrip()
@@ -160,7 +175,17 @@ def input_int(text, minval=None, maxval=None):
 def load_config(book):
     with open(get_config_file(book)) as f:
         config = yaml.load(f)
-    config.setdefault("base_url", DEFAULT_BASE_URL)
+    if "website" not in config:
+        if "base_url" not in config:
+            config["website"] = DEFAULT_WEBSITE
+        elif "wuxiaworld" in config["base_url"]:
+            config["website"] = "wuxiaworld"
+        elif "lnmtl" in config["base_url"]:
+            config["website"] = "lnmtl"
+        else:
+            print("No website and unknown base_url:", config["base_url"])
+    
+    config.setdefault("base_url", BASE_URLS[config["website"]])
     config.setdefault("follow_links", DEFAULT_FOLLOW_LINKS)
     return config
 

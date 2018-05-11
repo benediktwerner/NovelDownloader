@@ -1,0 +1,40 @@
+body {
+	background: #1d1c1c;
+	color: #888;/*lightgray;*/
+	font-family: "Open Sans", sans-serif;
+	max-width: 800px;
+	margin-left: 22%;
+	padding: 20px 0;
+}
+
+@media(max-width: 1300px) {
+	body {
+		margin-left: 80px;
+		margin-right: 80px;
+	}
+}
+
+@media(max-width: 900px) {
+	body {
+		margin-left: 20px;
+		margin-right: 20px;
+	}
+}
+
+a {
+	color: lightgray;
+}
+
+a:hover {
+	opacity: 0.7;
+	text-decoration: none;
+}
+
+#article {
+	text-align: justify;
+	padding: 20px 0;
+}
+
+#next {
+	float: right;
+}
