@@ -10,6 +10,11 @@ import os
 def main():
     # TODO: List books
     book = input("Which book? ")
+    if not book:
+        book = utils.get_data("last_book")
+    if not book:
+        print("Please enter something")
+        return
     book_dir = utils.get_book_dir(book)
     
     if not os.path.isdir(book_dir):
@@ -20,6 +25,7 @@ def main():
     utils.ensure_config(book)
 
     config = utils.load_config(book)
+    utils.update_data("last_book", book)
     
     if utils.input_yes_no("Do you want to download chapters?"):
         print("Which chapters do you want to download?")

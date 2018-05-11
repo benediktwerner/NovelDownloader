@@ -14,6 +14,8 @@ RAW_DIR_NAME = "raw"
 CONFIG_FILE_NAME = "config.yml"
 CHAPTER_NAMES_FILE_NAME = "chapter-names.txt"
 
+DATA_FILE = "data.yml"
+
 MISSING_CHAPTER_NAME = "X"
 
 DEFAULT_WEBSITE = "wuxiaworld"
@@ -196,6 +198,29 @@ def ensure_config(book):
 def ensure_dir(directory):
     if not os.path.isdir(directory):
         os.mkdir(directory)
+
+def load_data():
+    if os.path.isfile(DATA_FILE):
+        with open(DATA_FILE) as f:
+            return yaml.load(f)
+    return None
+
+def save_data(data):
+    with open(DATA_FILE, "w") as f:
+        yaml.dump(data, f, default_flow_style=False)
+
+def get_data(key):
+    data = load_data()
+    if data and key in data:
+        return data[key]
+    return None
+
+def update_data(key, value):
+    data = load_data()
+    if not data:
+        data = {}
+    data[key] = value
+    save_data(data)
 
 class ProgressBar:
     def __init__(self, start, end, text="Processing"):
