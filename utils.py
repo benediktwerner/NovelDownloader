@@ -156,10 +156,12 @@ def input_yes_no(text, default=True):
         return user_input.lower() == "y"
     return default
 
-def input_int(text, minval=None, maxval=None):
+def input_int(text, minval=None, maxval=None, default=None):
     user_input = input(text)
     while True:
         try:
+            if default and not user_input:
+                return default
             x = int(user_input)
             if minval is not None and x < minval or maxval is not None and x > maxval:
                 if minval is not None:

@@ -26,7 +26,10 @@ def main():
 
     config = utils.load_config(book)
     utils.update_data("last_book", book)
-    
+
+    chapter_start = None
+    chapter_end = None
+
     if utils.input_yes_no("Do you want to download chapters?"):
         print("Which chapters do you want to download?")
         chapter_start = utils.input_int("First chapter? ")
@@ -50,8 +53,8 @@ def main():
         volume = utils.input_int("Which volume? ", 1, len(config["volumes"]))
         chapter_range = utils.get_chapters_from_volume(volume, config["volumes"])
     else:
-        chapter_start = utils.input_int("First chapter? ")
-        chapter_end = utils.input_int("Last chapter? ", chapter_start)
+        chapter_start = utils.input_int("First chapter? ", default=chapter_start)
+        chapter_end = utils.input_int("Last chapter? ", chapter_start, default=chapter_end)
         chapter_range = (chapter_start, chapter_end)
     
     print("\nBook converters:")
