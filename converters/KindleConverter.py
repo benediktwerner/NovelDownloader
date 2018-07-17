@@ -2,6 +2,7 @@ import utils
 from . import BookConverter
 
 import re
+import html
 
 
 _SPOILER_TEXT = 'class="collapseomatic_content'
@@ -44,7 +45,7 @@ class KindleConverter(BookConverter):
     def process_chapter(self, ch):
         text = self.load_chapter(ch)
 
-        text = text.replace("\n", "")
+        text = re.sub("\n\s*", "", text)
         text = text.replace("<br>", "\n")
         text = text.replace("<br/>", "\n")
         text = text.replace("<br />", "\n")
@@ -86,7 +87,7 @@ class KindleConverter(BookConverter):
         # Clean leftover tags
         text = re.sub(r"<.*?>", "", text)
 
-        return text.strip()
+        return html.unescape(text.strip())
 
 
 # def get_footnote_num(txt_before):
