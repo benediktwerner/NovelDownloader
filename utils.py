@@ -22,7 +22,8 @@ DEFAULT_WEBSITE = "wuxiaworld"
 DEFAULT_FOLLOW_LINKS = False
 BASE_URLS = {
     "wuxiaworld": "https://www.wuxiaworld.com",
-    "lnmtl": "https://lnmtl.com"
+    "lnmtl": "https://lnmtl.com",
+    "qidian": "https://www.webnovels.com"
 }
 
 def download_url(url):
@@ -189,6 +190,7 @@ def load_config(book):
     
     config.setdefault("base_url", BASE_URLS[config["website"]])
     config.setdefault("follow_links", DEFAULT_FOLLOW_LINKS)
+    config.setdefault("file_pattern", "chapter-{chapter}")
     return config
 
 def ensure_config(book):
@@ -197,7 +199,7 @@ def ensure_config(book):
 
 def ensure_dir(directory):
     if not os.path.isdir(directory):
-        os.mkdir(directory)
+        os.makedirs(directory)
 
 def load_data():
     if os.path.isfile(DATA_FILE):
