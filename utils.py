@@ -1,5 +1,4 @@
-import urllib.request as urllib
-import urllib.error as urlerror
+import requests
 import yaml
 import os
 
@@ -31,12 +30,11 @@ def download_url(url):
         "User-Agent":'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7',
         "Cookie":"cookieconsent_status=dismiss; remember_web_59ba36addc2b2f9401580f014c7f58ea4e30989d=eyJpdiI6IjRWY1RGbmd0VU51elBuMlRrMlhUdnc9PSIsInZhbHVlIjoiMTZNODlGdHVKa0QrMHdaUjlkMnczWVdnNFpGT3FkdTFjek5CaEZMOXk5eEpWNmxTN0tlZmx5a0VxNFwvSXdcL1N0dkFhOEpJRFBia0s5Ymd0cUF3cHc2QUlYb1RpZVg2aVdab0ZkVWwraGMyST0iLCJtYWMiOiI3MmI5ODk4ZTM3NTg1ZDM0NTdkZmE5NTU2MWMxNTE4MWQxMWU0N2E2Mzk2OTgxZmQ0OTg5ODFlYTJiNjQzYmQyIn0%3D"
         }
-    req = urllib.Request(url, headers=header)
     try:
-        page = urllib.urlopen(req)
-    except urlerror.HTTPError:
+        return requests.get(url).text
+    except Exception:
+        print("Error while downloading URL:", url)
         return None
-    return page.read().decode()
 
 def in_range(r, i):
     """
