@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import utils
 
+from sys import argv
 
-BOOK = "LOHP"
-BOOK_ID = "6831850602000905"
+
+if len(argv) != 5:
+    print("Usage:", argv[0], "BOOK_NAME", "BOOK_ID", "FIRST_CHAPTER", "LAST_CHAPTER")
+    exit(1)
+
+
+BOOK = argv[1]
+BOOK_ID = argv[2]
 BASE_URL = "https://www.webnovel.com/book/"
 
-FIRST_CHAPTER = 501
-LAST_CHAPTER = 726
+FIRST_CHAPTER = int(argv[3])
+LAST_CHAPTER = int(argv[4])
 
 
 def download_chapter(ch):
@@ -31,6 +39,7 @@ with open(utils.get_book_dir(BOOK, "toc.txt")) as f:
         toc.append(line.rstrip())
 
 progress = utils.ProgressBar(FIRST_CHAPTER, LAST_CHAPTER, "Downloading")
+os.makedirs(utils.get_book_dir(BOOK, "raw"), exist_ok=True)
 
 for ch in range(FIRST_CHAPTER, LAST_CHAPTER + 1):
     progress.update()
