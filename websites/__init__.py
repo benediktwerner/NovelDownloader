@@ -5,8 +5,8 @@ class Website:
     name = None
     url = None
 
-    @staticmethod
-    def get_chapter_url(chapter, config):
+    @classmethod
+    def get_chapter_url(cls, chapter, config):
         if "volumes" in config:
             volume = utils.get_volume_from_chapter(chapter, config["volumes"])
             return config["chapter_url"].format(

@@ -30,8 +30,8 @@ def create_config(book):
     config["book"] = book
     config["website"] = _get_website()
 
-    if config["website"] != websites.Qidian.name:
-        pass
+    if config["website"] == websites.Qidian.name:
+        config["book_id"] = input("Book id? ")
     else:
         config["chapter_url"] = _format_url(
             input("Chapter Url? (Use {volume}, {chapter}, {chapter_name}) "))
