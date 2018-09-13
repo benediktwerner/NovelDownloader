@@ -55,14 +55,6 @@ class KindleConverter(BookConverter):
         text = text.replace("</strong>", "\n")
         text = text.replace("<em>", "**")
         text = text.replace("</em>", "**")
-        text = text.replace("&#8211;", "–")
-        text = text.replace("&#8212;", "—")
-        text = text.replace("&#8217;", "’")
-        text = text.replace("&#8230;", "…")
-        text = text.replace("&#8220;", "“")
-        text = text.replace("&#8221;", "”")
-        text = text.replace("&#8216;", "‘")
-        text = text.replace("&hellip;", "…")
         text = re.sub(r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL)
         text = text.replace("</sentence>", "\n\n")
 
@@ -127,31 +119,3 @@ class KindleConverter(BookConverter):
 #             return "ERROR"
 #         text = text.replace(ftext, "[{}]".format(footnotes[i+1]))
 #     return text
-
-
-# ISSTH_BOOK = 1
-
-# ISSTH_BOOK_TITLES = ["",
-#                "Patriarch Reliance", #1
-#                "", #2
-#                "", #3
-#                "Five Color Paragon", #4
-#                "Nirvanic Rebirth. Blood Everywhere!", #5
-#                "Fame That Rocks the Ninth Mountain; the Path to True Immortality", #6
-#                "Immortal Ancient Builds a Bridge Leaving the Ninth Mountain!", #7
-#                "My Mountain and Sea Realm" #8
-#                ]
-# ISSTH_CHAPTERS = (1,96,205,314,629,801,1005,1212,1410,1558)
-# ISSTH_SKIP_CHAPTERS = (583, 1377)
-# ISSTH_TITLE = "I Shall Seal The Heavens - Book {} - {}".format(ISSTH_BOOK, ISSTH_BOOK_TITLES[ISSTH_BOOK])
-# ISSTH_INPUT_FILENAME = "issth-new/book-{book}-chapter-{chapter}.html"
-# ISSTH_OUTPUT_FILENAME = "ISSTH Book {} - {}.txt".format(ISSTH_BOOK, ISSTH_BOOK_TITLES[ISSTH_BOOK])
-# ISSTH_CHAPTER_RANGE = (ISSTH_CHAPTERS[ISSTH_BOOK-1], ISSTH_CHAPTERS[ISSTH_BOOK])
-
-# WMW_TITLE = "Warlock of the Magus World - Chapters {}-{}".format(*CHAPTER_RANGE)
-# WMW_INPUT_FILENAME = "wmw-new/chapter-{chapter}.html"
-# WMW_OUTPUT_FILENAME = "WMW Chapters {}-{}.txt".format(*CHAPTER_RANGE)
-
-# SA_TITLE = "Skyfire Avenue - Chapters {}-{}".format(*CHAPTER_RANGE)
-# SA_INPUT_FILENAME = "SA/chapter-{chapter}.html"
-# SA_OUTPUT_FILENAME = "Skyfire Avenue - Chapters {}-{}.txt".format(*CHAPTER_RANGE)

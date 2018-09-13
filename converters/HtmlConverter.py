@@ -48,11 +48,11 @@ class HtmlConverter(BookConverter):
             progress.update()
             
             links = {
-                "prev": self.filename_of_chapter(ch - 1) + ".html",
-                "nxt": self.filename_of_chapter(ch + 1) + ".html"
+                "prev": utils.chapter_name(ch - 1) + ".html",
+                "nxt": utils.chapter_name(ch + 1) + ".html"
             }
             
-            with open(os.path.join(output_dir, self.filename_of_chapter(ch) + ".html"), "wb") as f:
+            with open(os.path.join(output_dir, utils.chapter_name(ch) + ".html"), "wb") as f:
                 before = _HTML_BEFORE.format(**links)
                 after = _HTML_AFTER.format(**links)
                 output = before + self.process_chapter(ch) + after
