@@ -26,7 +26,7 @@ def _get_website():
 def create_config(book):
     config = {}
 
-    print("\nCreating new config for {}:".format(book))
+    print("Creating new config for {}:".format(book))
     config["book"] = book
     config["website"] = _get_website()
 
@@ -36,7 +36,7 @@ def create_config(book):
         config["chapter_url"] = _format_url(
             input("Chapter Url? (Use {volume}, {chapter}, {chapter_name}) "))
 
-    name = input("Name? ")
+    name = input("Name? (optional)")
     if name:
         config["name"] = name
 
@@ -47,7 +47,8 @@ def create_config(book):
     with open(utils.get_config_file(book), "w") as f:
         yaml.dump(config, f, default_flow_style=False)
 
-    print("Config created at:", utils.get_config_file(book), end="\n\n")
+    print("Config created at:", utils.get_config_file(book))
+    print()
 
 
 def load_config(book):

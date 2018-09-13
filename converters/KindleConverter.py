@@ -15,11 +15,11 @@ class KindleConverter(BookConverter):
     name = "Kindle Converter"
 
     def convert_chapters(self, chapter_start, chapter_end):
-        name = self.config.get("name", self.book)
+        name = self.conf.get("name", self.book)
         file_name = "{} - Chapters {}-{}.txt".format(name if len(name) <= 20 else self.book.upper(), chapter_start, chapter_end)
         output_file = utils.get_book_dir(self.book, _OUTPUT_DIR, file_name)
         title = "{} - Chapters {}-{}".format(name, chapter_start, chapter_end)
-        skip_chapters = self.config.get("skip_chapters", [])
+        skip_chapters = self.conf.get("skip_chapters", [])
 
         utils.ensure_dir(utils.get_book_dir(self.book, _OUTPUT_DIR))
         progress = utils.ProgressBar(chapter_start, chapter_end, "Converting")
@@ -32,7 +32,7 @@ class KindleConverter(BookConverter):
                     continue
                 
                 progress.update()
-                if self.config.get("add_chapter_titles", False):
+                if self.conf.get("add_chapter_titles", False):
                     f.write("Chapter {}\n\n".format(ch).encode())
                 f.write(self.process_chapter(ch).encode())
 

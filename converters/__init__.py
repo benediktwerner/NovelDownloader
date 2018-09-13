@@ -7,9 +7,9 @@ import utils
 class BookConverter:
     name = "Unnamed converter"
 
-    def __init__(self, book, config):
-        self.book = book
-        self.config = config
+    def __init__(self, conf):
+        self.book = conf["book"]
+        self.conf = conf
 
     def load_chapter(self, ch):
         with open(os.path.join(utils.get_raw_dir(self.book), utils.chapter_name(ch) + ".html"), "br") as f:

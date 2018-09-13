@@ -39,7 +39,7 @@ class HtmlConverter(BookConverter):
     def convert_chapters(self, chapter_start, chapter_end):
         output_dir = utils.get_book_dir(self.book, _OUTPUT_DIR)
         utils.ensure_dir(output_dir)
-        skip_chapters = self.config.get("skip_chapters", [])
+        skip_chapters = self.conf.get("skip_chapters", [])
         progress = utils.ProgressBar(chapter_start, chapter_end, "Converting")
 
         for ch in range(chapter_start, chapter_end + 1):

@@ -1,6 +1,7 @@
+import os
+import re
 import requests
 import yaml
-import os
 from sys import stderr
 
 import config
@@ -143,6 +144,53 @@ def update_data(key, value):
         data = {}
     data[key] = value
     save_data(data)
+
+
+def list_books():
+    for book in sorted(os.listdir(BASE_DIR)):
+        if os.path.isfile(get_config_file(book)):
+            conf = config.load_config(book)
+            if "name" in conf:
+                print(book, "-", conf["name"])
+                continue
+
+        print(book)
+
+
+def get_chapter_list(book, directory=RAW_DIR_NAME):
+    directory = get_book_dir(book, directory)
+    chapters = []
+
+    for chapter_name in os.listdir(directory):
+        match = re.match(r"chapter-(\d+)", chapter_name)
+        if match and match.groups() is not None:
+            chapters.append(int(match.group(1)))
+
+    if not chapters:
+        return chapters
+
+    chapters.sort()
+
+    groups = []
+    curr_min = chapters[0]
+    curr_max = chapters[0]
+
+    for chapter in chapters[1:]:
+        if curr_max == chapter-1:
+            curr_max = chapter
+        else:
+            groups.append((curr_min, curr_max))
+            curr_min = chapter
+            curr_max = chapter
+
+    groups.append((curr_min, curr_max))
+    return groups
+
+
+def format_range(start, end):
+    if start == end:
+        return str(start)
+    return "{}-{}".format(start, end)
 
 
 class ProgressBar:
