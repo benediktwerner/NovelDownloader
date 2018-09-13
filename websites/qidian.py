@@ -8,7 +8,6 @@ TOC_URL = "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken={}
 CHAPTER_URL = "https://www.webnovel.com/book/{}/{}"
 
 TITLE_START = '<div class="cha-tit">'
-TITLE_END = '</h3>'
 
 
 class Qidian(Website):
@@ -49,11 +48,12 @@ class Qidian(Website):
     @classmethod
     def get_chapter_content(cls, content):
         title_start = content.find(TITLE_START)
-        title_end = content.find(TITLE_END, title_start)
+        title_start = content.find("<h3>", title_start)
+        title_end = content.find("</h3>", title_start)
 
-        chapter_content = super().get_chapter_content(content)
+        chapter_content = super().get_chapter_content(content).replace("\n", "")
 
         if title_start != -1 and title_end != -1 and title_start < title_end:
-            chapter_content = content[title_start+len(TITLE_START):title_end+len(TITLE_END)] + chapter_content
+            chapter_content = content[title_start:title_end+len("</h3>")] + "\n" + chapter_content
 
         return chapter_content
