@@ -51,8 +51,12 @@ def choose_book():
 
 
 def download_chapters(conf):
-    print("Chapters on disk:")
-    print(", ".join(utils.format_range(*x) for x in utils.get_chapter_list(conf["book"])))
+    chapters = utils.get_chapter_list(conf["book"])
+    if chapters:
+        print("Chapters on disk:")
+        print(", ".join(utils.format_range(*x) for x in chapters))
+    else:
+        print("No chapters on disk")
     print()
     print("Which chapters do you want to download?")
 

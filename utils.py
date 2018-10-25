@@ -161,6 +161,9 @@ def get_chapter_list(book, directory=RAW_DIR_NAME):
     directory = get_book_dir(book, directory)
     chapters = []
 
+    if not os.path.isdir(directory):
+        return chapters
+
     for chapter_name in os.listdir(directory):
         match = re.match(r"chapter-(\d+)", chapter_name)
         if match and match.groups() is not None:

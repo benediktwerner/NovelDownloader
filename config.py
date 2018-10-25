@@ -17,9 +17,9 @@ def _format_url(url):
 def _get_website():
     while True:
         website = input("Website? ({}) ".format(
-            ", ".join(websites.WEBSITES)))
-        if website in websites.WEBSITES:
-            return websites
+            ", ".join(w.name for w in websites.WEBSITES)))
+        if website in websites.WEBSITES_DICT:
+            return website
         print("Unknown website:", website)
 
 
@@ -36,7 +36,7 @@ def create_config(book):
         config["chapter_url"] = _format_url(
             input("Chapter Url? (Use {volume}, {chapter}, {chapter_name}) "))
 
-    name = input("Name? (optional)")
+    name = input("Name? (optional) ")
     if name:
         config["name"] = name
 
