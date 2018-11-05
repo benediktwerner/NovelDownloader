@@ -51,13 +51,6 @@ def choose_book():
 
 
 def download_chapters(conf):
-    chapters = utils.get_chapter_list(conf["book"])
-    if chapters:
-        print("Chapters on disk:")
-        print(", ".join(utils.format_range(*x) for x in chapters))
-    else:
-        print("No chapters on disk")
-    print()
     print("Which chapters do you want to download?")
 
     chapter_start = utils.input_int("First chapter? ")
@@ -109,6 +102,13 @@ def main():
         print("Selected", book, "-", conf["name"])
     else:
         print("Selected", book)
+
+    chapters = utils.get_chapter_list(book)
+    if chapters:
+        print("Chapters on disk:")
+        print(", ".join(utils.format_range(*x) for x in chapters))
+    else:
+        print("No chapters on disk")
     print()
 
     if utils.input_yes_no("Do you want to download chapters?"):
