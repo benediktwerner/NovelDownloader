@@ -10,6 +10,7 @@ _OUTPUT_DIR = "html"
 _HTML_BEFORE = """
 <html>
 <head>
+    <title>{title}</title>
     <link rel="stylesheet" href="../../../style/style.css">
     <script src="../../../style/script.js"></script>
 </head>
@@ -48,6 +49,7 @@ class HtmlConverter(BookConverter):
             progress.update()
             
             links = {
+                "title": self.book.upper() + " &mdash; " + utils.chapter_name(ch),
                 "prev": utils.chapter_name(ch - 1) + ".html",
                 "nxt": utils.chapter_name(ch + 1) + ".html"
             }
