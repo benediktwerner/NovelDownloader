@@ -71,10 +71,25 @@ class Qidian(Website):
     @classmethod
     def cookies_expired(cls, content):
         template_start = content.find("ejs-template")
-        return "locked" in content[:template_start]
+        return "Locked Chapter" in content[:template_start]
 
     @classmethod
     def update_cookies(cls):
-        print("\n\nERROR: Qidian cookies expired!")
-        ukey = input("Enter new ukey: ")
-        cls.cookies["ukey"] = ukey
+        print("\n")
+        if "uuid" in cls.cookies:
+            if "ukey" in cls.cookies:
+                print("Qidian cookie expired!")
+                ukey = input("Enter new ukey: ")
+                cls.cookies["ukey"] = ukey
+            else:
+                print("Qidian cookie incomplete!")
+                cls.cookies["ukey"] = input("Enter ukey: ")
+        elif "ukey" in cls.cookies:
+            print("Qidian cookie incomplete!")
+            cls.cookies["uuid"] = input("Enter uuid: ")
+        else:
+            print("Qidian requires a cookie!")
+            cls.cookies["uuid"] = input("Enter uuid: ")
+            cls.cookies["ukey"] = input("Enter ukey: ")
+
+        utils.update_data(COOKIES_DATA_KEY, cls.cookies)
