@@ -8,25 +8,26 @@ COOKIES_DATA_KEY = "qidian_cookies"
 
 BOOK_URL = "https://www.webnovel.com/book/{}"
 TOC_URL = "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken={}&bookId={}"
-CHAPTER_URL = "https://www.webnovel.com/book/{}/{}"
-
-TITLE_START = '<div class="cha-tit">'
+CHAPTER_URL = "https://www.webnovel.com/apiajax/chapter/GetContent?_csrfToken={}&bookId={}&chapterId={}"
 
 
 class Qidian(Website):
     name = "qidian"
     url = "https://www.webnovels.com"
 
-    chapter_separator_start = '<div class="cha-words">'
-    chapter_separator_end = '</div>'
-
+    csrf_token = None
     tocs = {}
     cookies = {}
 
-    @staticmethod
-    def _get_toc(book_id):
-        csrf_token = requests.get(BOOK_URL.format(book_id)).cookies["_csrfToken"]
-        toc_json = requests.get(TOC_URL.format(csrf_token, book_id)).json()
+    @classmethod
+    def __get_csrf_token(cls, book_id):
+        if not cls.csrf_token:
+            cls.csrf_token = requests.get(BOOK_URL.format(book_id)).cookies["_csrfToken"]
+        return cls.csrf_token
+
+    @classmethod
+    def __download_toc(cls, book_id):
+        toc_json = requests.get(TOC_URL.format(cls.__get_csrf_token(book_id), book_id)).json()
 
         if toc_json["code"] != 0:
             raise Exception("Recieved return code {} when trying to get TOC".format(toc_json["code"]))
@@ -40,41 +41,44 @@ class Qidian(Website):
         return toc
 
     @classmethod
+    def prepare_download(cls, config):
+        book_id = config["book_id"]
+        if book_id not in cls.tocs:
+            cls.tocs[book_id] = cls.__download_toc(book_id)
+
+    @classmethod
     def get_chapter_url(cls, chapter, config):
         book_id = config["book_id"]
-
-        if book_id not in cls.tocs:
-            cls.tocs[book_id] = cls._get_toc(book_id)
-
         chapter_id = cls.tocs[book_id][chapter]
-        return CHAPTER_URL.format(book_id, chapter_id)
+        return CHAPTER_URL.format(cls.__get_csrf_token(book_id), book_id, chapter_id)
 
     @classmethod
-    def get_chapter_content(cls, content):
-        title_start = content.find(TITLE_START)
-        title_start = content.find("<h3>", title_start)
-        title_end = content.find("</h3>", title_start)
+    def download_chapter(cls, chapter, config):
+        url = cls.get_chapter_url(chapter, config)
 
-        chapter_content = super().get_chapter_content(content).replace("\n", "")
+        content = utils.download_url(url, json=True, cookies=cls.__get_cookies())
+        if not content:
+            raise Exception("Failed to download chapter from {}".format(url))
 
-        if title_start != -1 and title_end != -1 and title_start < title_end:
-            chapter_content = content[title_start:title_end+len("</h3>")] + "\n" + chapter_content
+        if content["data"]["chapterInfo"]["isAuth"] == 0:
+            cls.__update_cookies()
+            content = utils.download_url(url, json=True, cookies=cls.__get_cookies())
 
-        return chapter_content
+            if content is None:
+                raise Exception("Failed to download chapter from {}".format(url))
+            elif content["data"]["chapterInfo"]["isAuth"] == 0:
+                raise Exception("Failed to authorize chapter {}".format(url))
+
+        return content["data"]["chapterInfo"]["content"]
 
     @classmethod
-    def get_cookies(cls):
+    def __get_cookies(cls):
         if not cls.cookies:
             cls.cookies = utils.get_data(COOKIES_DATA_KEY)
         return cls.cookies
 
     @classmethod
-    def cookies_expired(cls, content):
-        template_start = content.find("ejs-template")
-        return "Locked Chapter" in content[:template_start]
-
-    @classmethod
-    def update_cookies(cls):
+    def __update_cookies(cls):
         print("\n")
         if "uuid" in cls.cookies:
             if "ukey" in cls.cookies:

@@ -25,11 +25,15 @@ def print_error(*args):
     print(*args, file=stderr)
 
 
-def download_url(url, cookies=None):
+def download_url(url, json=False, cookies=None):
     # header = {
     #     "User-Agent": 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7',
     # }
-    return requests.get(url, cookies=cookies).text
+    response = requests.get(url, cookies=cookies)
+
+    if json:
+        return response.json()
+    return response.text
 
 
 def in_range(r, i):

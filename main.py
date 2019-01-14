@@ -59,9 +59,6 @@ def download_chapters(conf):
     try:
         downloader.download_chapters(chapter_start, chapter_end, conf)
         return chapter_start, chapter_end
-    except downloader.DownloadException as e:
-        print("\nERROR:", e)
-        return None
     except:
         print()
         raise

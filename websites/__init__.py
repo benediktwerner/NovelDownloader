@@ -24,7 +24,21 @@ class Website:
     chapter_separator_end = None
 
     @classmethod
-    def get_chapter_content(cls, content):
+    def prepare_download(cls, config):
+        pass
+
+    @classmethod
+    def download_chapter(cls, chapter, config):
+        url = cls.get_chapter_url(chapter, config)
+
+        content = utils.download_url(url)
+        if content is None:
+            raise Exception("Failed to download chapter from {}".format(url))
+
+        return cls.extract_chapter_content(content)
+
+    @classmethod
+    def extract_chapter_content(cls, content):
         content_start = content.find(cls.chapter_separator_start)
         content_end = content.find(cls.chapter_separator_end, content_start)
 
@@ -32,18 +46,6 @@ class Website:
             return None
 
         return content[content_start+len(cls.chapter_separator_start):content_end]
-
-    @classmethod
-    def get_cookies(cls):
-        return {}
-
-    @classmethod
-    def cookies_expired(cls, content):
-        return False
-
-    @classmethod
-    def update_cookies(cls):
-        raise Exception("This website does not support updating cookies")
 
 
 from .qidian import Qidian
