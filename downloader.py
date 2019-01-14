@@ -14,12 +14,20 @@ class DownloadException(Exception):
 
 
 def download_chapter(url, file_path, config):
-    content = utils.download_url(url)
+    website = config["website"]
+    content = utils.download_url(url, cookies=website.get_cookies())
     if content is None:
         raise DownloadException(
             "Failed to download chapter from {}".format(url))
 
-    chapter_content = config["website"].get_chapter_content(content)
+    if website.cookies_expired(content):
+        website.update_cookies()
+        content = utils.download_url(url, cookies=website.get_cookies())
+        if content is None:
+            raise DownloadException(
+                "Failed to download chapter from {}".format(url))
+
+    chapter_content = website.get_chapter_content(content)
 
     if chapter_content is None:
         utils.ensure_dir("dumps")

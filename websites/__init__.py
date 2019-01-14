@@ -30,8 +30,20 @@ class Website:
 
         if content_start == -1 or content_end == -1 or content_start >= content_end:
             return None
-        
+
         return content[content_start+len(cls.chapter_separator_start):content_end]
+
+    @classmethod
+    def get_cookies(cls):
+        return {}
+
+    @classmethod
+    def cookies_expired(cls, content):
+        return False
+
+    @classmethod
+    def update_cookies(cls):
+        raise Exception("This website does not support updating cookies")
 
 
 from .qidian import Qidian

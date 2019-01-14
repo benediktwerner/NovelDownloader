@@ -1,7 +1,10 @@
 import requests
 
+import utils
 from . import Website
 
+
+COOKIES_DATA_KEY = "qidian_cookies"
 
 BOOK_URL = "https://www.webnovel.com/book/{}"
 TOC_URL = "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken={}&bookId={}"
@@ -18,6 +21,7 @@ class Qidian(Website):
     chapter_separator_end = '</div>'
 
     tocs = {}
+    cookies = {}
 
     @staticmethod
     def _get_toc(book_id):
@@ -57,3 +61,20 @@ class Qidian(Website):
             chapter_content = content[title_start:title_end+len("</h3>")] + "\n" + chapter_content
 
         return chapter_content
+
+    @classmethod
+    def get_cookies(cls):
+        if not cls.cookies:
+            cls.cookies = utils.get_data(COOKIES_DATA_KEY)
+        return cls.cookies
+
+    @classmethod
+    def cookies_expired(cls, content):
+        template_start = content.find("ejs-template")
+        return "locked" in content[:template_start]
+
+    @classmethod
+    def update_cookies(cls):
+        print("\n\nERROR: Qidian cookies expired!")
+        ukey = input("Enter new ukey: ")
+        cls.cookies["ukey"] = ukey
