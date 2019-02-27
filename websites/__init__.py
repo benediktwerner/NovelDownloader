@@ -7,15 +7,7 @@ class Website:
 
     @classmethod
     def get_chapter_url(cls, chapter, config):
-        if "volumes" in config:
-            volume = utils.get_volume_from_chapter(chapter, config["volumes"])
-            return config["chapter_url"].format(
-                chapter=chapter, volume=volume, base_url=config["base_url"]
-            )
-
-        return config["chapter_url"].format(
-            chapter=chapter, base_url=config["base_url"]
-        )
+        raise NotImplementedError
 
     chapter_separator_start = None
     chapter_separator_end = None

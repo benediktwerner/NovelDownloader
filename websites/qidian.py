@@ -31,9 +31,9 @@ class Qidian(Website):
 
     @classmethod
     def __download_toc(cls, book_id):
-        toc_json = requests.get(
-            TOC_URL.format(cls.__get_csrf_token(book_id), book_id)
-        ).json()
+        toc_json = utils.download_url(
+            TOC_URL.format(cls.__get_csrf_token(book_id), book_id), json=True
+        )
 
         if toc_json["code"] != 0:
             raise Exception(
