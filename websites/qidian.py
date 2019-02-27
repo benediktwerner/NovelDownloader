@@ -1,5 +1,3 @@
-import requests
-
 import utils
 from . import Website
 
@@ -22,17 +20,9 @@ class Qidian(Website):
     cookies = {}
 
     @classmethod
-    def __get_csrf_token(cls, book_id):
-        if not cls.csrf_token:
-            cls.csrf_token = requests.get(BOOK_URL.format(book_id)).cookies[
-                "_csrfToken"
-            ]
-        return cls.csrf_token
-
-    @classmethod
-    def __download_toc(cls, book_id):
-        toc_json = utils.download_url(
-            TOC_URL.format(cls.__get_csrf_token(book_id), book_id), json=True
+    async def __download_toc(cls, book_id, session):
+        toc_json = await utils.download_url(
+            TOC_URL.format(cls.csrf_token, book_id), session, json=True
         )
 
         if toc_json["code"] != 0:
@@ -51,28 +41,37 @@ class Qidian(Website):
         return toc
 
     @classmethod
-    def prepare_download(cls, config):
+    async def prepare_download(cls, config, session):
         book_id = config["book_id"]
+        if not cls.csrf_token:
+            cls.csrf_token = await utils.download_cookie(
+                BOOK_URL.format(book_id), "_csrfToken", session
+            )
+
         if book_id not in cls.tocs:
-            cls.tocs[book_id] = cls.__download_toc(book_id)
+            cls.tocs[book_id] = await cls.__download_toc(book_id, session)
 
     @classmethod
     def get_chapter_url(cls, chapter, config):
         book_id = config["book_id"]
         chapter_id = cls.tocs[book_id][chapter]
-        return CHAPTER_URL.format(cls.__get_csrf_token(book_id), book_id, chapter_id)
+        return CHAPTER_URL.format(cls.csrf_token, book_id, chapter_id)
 
     @classmethod
-    def download_chapter(cls, chapter, config):
+    async def download_chapter(cls, chapter, config, session):
         url = cls.get_chapter_url(chapter, config)
 
-        content = utils.download_url(url, json=True, cookies=cls.__get_cookies())
+        content = await utils.download_url(
+            url, session, json=True, cookies=cls.__get_cookies()
+        )
         if not content:
             raise Exception("Failed to download chapter from {}".format(url))
 
         if content["data"]["chapterInfo"]["isAuth"] == 0:
             cls.__update_cookies()
-            content = utils.download_url(url, json=True, cookies=cls.__get_cookies())
+            content = utils.download_url(
+                url, session, json=True, cookies=cls.__get_cookies()
+            )
 
             if content is None:
                 raise Exception("Failed to download chapter from {}".format(url))

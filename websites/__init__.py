@@ -13,14 +13,14 @@ class Website:
     chapter_separator_end = None
 
     @classmethod
-    def prepare_download(cls, config):
+    async def prepare_download(cls, config, session):
         pass
 
     @classmethod
-    def download_chapter(cls, chapter, config):
+    async def download_chapter(cls, chapter, config, session):
         url = cls.get_chapter_url(chapter, config)
 
-        content = utils.download_url(url)
+        content = await utils.download_url(url, session)
         if content is None:
             raise Exception("Failed to download chapter from {}".format(url))
 

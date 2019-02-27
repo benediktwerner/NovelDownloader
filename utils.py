@@ -1,6 +1,5 @@
 import os
 import re
-import requests
 import yaml
 from sys import stderr
 
@@ -26,16 +25,19 @@ def print_error(*args):
     print(*args, file=stderr)
 
 
-def download_url(url, json=False, cookies=None):
+async def download_url(url, session, json=False, cookies=None):
     # header = {
     #     "User-Agent": 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7',
     # }
-    response = requests.get(url, cookies=cookies)
-    response.encoding = "utf-8"
+    async with session.get(url, cookies=cookies) as response:
+        if json:
+            return await response.json()
+        return await response.text()
 
-    if json:
-        return response.json()
-    return response.text
+
+async def download_cookies(url, name, session):
+    async with session.get(url) as response:
+        return response.cookies[name].value
 
 
 def in_range(r, i):
@@ -240,6 +242,7 @@ class ProgressBar:
             print("Done.")
 
     if HAS_PROGRESS_BAR:
+
         class RelativeCounter(progressbar.Widget):
             def __init__(self, minval):
                 self.minval = minval

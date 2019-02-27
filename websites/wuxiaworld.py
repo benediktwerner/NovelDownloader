@@ -20,8 +20,8 @@ class Wuxiaworld(Website):
     tocs = {}
 
     @classmethod
-    def __download_toc(cls, book_id):
-        toc_page = utils.download_url(TOC_URL.format(book_id))
+    async def __download_toc(cls, book_id, session):
+        toc_page = await utils.download_url(TOC_URL.format(book_id), session)
 
         start = toc_page.find(TOC_START)
         end = toc_page.find(TOC_END, start)
@@ -30,10 +30,10 @@ class Wuxiaworld(Website):
         return [None] + re.findall('"(/novel/.*?)"', toc_page)
 
     @classmethod
-    def prepare_download(cls, config):
+    async def prepare_download(cls, config, session):
         book_id = config["book_id"]
         if book_id not in cls.tocs:
-            cls.tocs[book_id] = cls.__download_toc(book_id)
+            cls.tocs[book_id] = await cls.__download_toc(book_id, session)
 
     @classmethod
     def get_chapter_url(cls, chapter, config):
