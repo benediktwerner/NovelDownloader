@@ -17,7 +17,9 @@ def download_chapter(chapter, file_path, config):
         with open("dumps/content.html", "w") as f:
             f.write(content)
 
-        raise Exception("Got empty chapter content from chapter {}. Content dumped.".format(chapter))
+        raise Exception(
+            "Got empty chapter content from chapter {}. Content dumped.".format(chapter)
+        )
 
     with open(file_path, "bw") as f:
         f.write(content.encode("utf-8"))
@@ -32,7 +34,7 @@ def download_chapters(chapter_start, chapter_end, config):
 
     progress = utils.ProgressBar(chapter_start, chapter_end, "Downloading")
 
-    for ch in range(chapter_start, chapter_end+1):
+    for ch in range(chapter_start, chapter_end + 1):
         progress.update()
 
         file_name = utils.chapter_name(ch)

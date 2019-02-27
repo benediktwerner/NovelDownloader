@@ -16,8 +16,9 @@ def _format_url(url):
 
 def _get_website():
     while True:
-        website = input("Website? ({}) ".format(
-            ", ".join(w.name for w in websites.WEBSITES)))
+        website = input(
+            "Website? ({}) ".format(", ".join(w.name for w in websites.WEBSITES))
+        )
         if website in websites.WEBSITES_DICT:
             return website
         print("Unknown website:", website)
@@ -34,7 +35,8 @@ def create_config(book):
         config["book_id"] = input("Book id? ")
     else:
         config["chapter_url"] = _format_url(
-            input("Chapter Url? (Use {volume}, {chapter}, {chapter_name}) "))
+            input("Chapter Url? (Use {volume}, {chapter}, {chapter_name}) ")
+        )
 
     name = input("Name? (optional) ")
     if name:
@@ -67,7 +69,9 @@ def load_config(book):
                     break
             else:
                 print(
-                    "Warning: Config has no 'website' and unknown 'base_url':", config["base_url"])
+                    "Warning: Config has no 'website' and unknown 'base_url':",
+                    config["base_url"],
+                )
                 print("         Assuming 'wuxiaworld'")
                 config["website"] = websites.Wuxiaworld
     else:

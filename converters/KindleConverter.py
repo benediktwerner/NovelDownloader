@@ -16,7 +16,9 @@ class KindleConverter(BookConverter):
 
     def convert_chapters(self, chapter_start, chapter_end):
         name = self.conf.get("name", self.book)
-        file_name = "{} - Chapters {}-{}.txt".format(name if len(name) <= 20 else self.book.upper(), chapter_start, chapter_end)
+        file_name = "{} - Chapters {}-{}.txt".format(
+            name if len(name) <= 20 else self.book.upper(), chapter_start, chapter_end
+        )
         output_file = utils.get_book_dir(self.book, _OUTPUT_DIR, file_name)
         title = "{} - Chapters {}-{}".format(name, chapter_start, chapter_end)
         skip_chapters = self.conf.get("skip_chapters", [])
@@ -27,19 +29,21 @@ class KindleConverter(BookConverter):
         with open(output_file, "wb") as f:
             f.write("{}\n\n\n".format(title).encode())
 
-            for ch in range(chapter_start, chapter_end+1):
+            for ch in range(chapter_start, chapter_end + 1):
                 if ch in skip_chapters:
                     continue
-                
+
                 progress.update()
                 if self.conf.get("add_chapter_titles", False):
                     f.write("Chapter {}\n\n".format(ch).encode())
                 f.write(self.process_chapter(ch).encode())
 
                 if ch != chapter_end:
-                    f.write("{0}{1}{0}".format(
-                        "\n"*_LINES_BETWEEN_CHAPTERS,
-                            _CHAPTER_SEPERATOR).encode())
+                    f.write(
+                        "{0}{1}{0}".format(
+                            "\n" * _LINES_BETWEEN_CHAPTERS, _CHAPTER_SEPERATOR
+                        ).encode()
+                    )
         progress.finish()
 
     def process_chapter(self, ch):
@@ -55,23 +59,30 @@ class KindleConverter(BookConverter):
         text = text.replace("</strong>", "\n")
         text = text.replace("<em>", "**")
         text = text.replace("</em>", "**")
-        text = re.sub(r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL)
+        text = re.sub(
+            r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL
+        )
         text = text.replace("</sentence>", "\n\n")
 
         # Remove chapter title spoiler tag
         spoiler = text.find(_SPOILER_TEXT)
         if spoiler != -1:
-            text = text[text.find(">", spoiler)+1:]
+            text = text[text.find(">", spoiler) + 1 :]
 
         # Add Footnotes inline
-        #text = process_footnotes(text)
+        # text = process_footnotes(text)
 
         # Remove "sponsored by"
         text = re.sub(r"[—–-]*\n\n.*?This chapter.+?sponsored.*?\n", "", text)
 
         # Remove audio
-        text = re.sub(r"[—–]{2,}.*?<script>document.createElement\('audio'\);</script>.*?</audio>", "", text, flags=re.S)
-        text = re.sub(r'\n.*\n<audio.*?</audio>', "", text)
+        text = re.sub(
+            r"[—–]{2,}.*?<script>document.createElement\('audio'\);</script>.*?</audio>",
+            "",
+            text,
+            flags=re.S,
+        )
+        text = re.sub(r"\n.*\n<audio.*?</audio>", "", text)
 
         # Clean <em> stars
         text = re.sub(r".\n\*\*\n", "**\n", text)
@@ -104,7 +115,7 @@ class KindleConverter(BookConverter):
 #         end = text.find('<span class="footnotereverse">', pos)
 #         footnotes.append(text[pos:end].strip())
 #         i += 1
-    
+
 #     return footnotes
 
 # def process_footnotes(text):

@@ -8,6 +8,7 @@ import config
 
 try:
     import progressbar
+
     HAS_PROGRESS_BAR = True
 except ImportError:
     HAS_PROGRESS_BAR = False
@@ -49,11 +50,11 @@ def in_range(r, i):
 def get_volume_from_chapter(c, volumes):
     for v, r in enumerate(volumes):
         if in_range(r, c):
-            return v+1
+            return v + 1
 
 
 def get_chapters_from_volume(v, volumes):
-    return (int(x.strip()) for x in volumes[v-1].split("-"))
+    return (int(x.strip()) for x in volumes[v - 1].split("-"))
 
 
 def get_book_dir(book, *subdirs):
@@ -180,7 +181,7 @@ def get_chapter_list(book, directory=RAW_DIR_NAME):
     curr_max = chapters[0]
 
     for chapter in chapters[1:]:
-        if curr_max == chapter-1:
+        if curr_max == chapter - 1:
             curr_max = chapter
         else:
             groups.append((curr_min, curr_max))
@@ -206,15 +207,21 @@ class ProgressBar:
 
         if HAS_PROGRESS_BAR:
             widgets = [
-                text +
-                " ", ProgressBar.RelativeCounter(
-                    start), " out of ", str(end), " ",
-                progressbar.Percentage(), " ", progressbar.Bar(
-                    left="[", right="]"), " ",
-                progressbar.ETA(), " "
+                text + " ",
+                ProgressBar.RelativeCounter(start),
+                " out of ",
+                str(end),
+                " ",
+                progressbar.Percentage(),
+                " ",
+                progressbar.Bar(left="[", right="]"),
+                " ",
+                progressbar.ETA(),
+                " ",
             ]
             self.progressbar = progressbar.ProgressBar(
-                widgets=widgets, maxval=end-start).start()
+                widgets=widgets, maxval=end - start
+            ).start()
 
     def update(self, newval=None):
         if newval is None:
@@ -232,9 +239,10 @@ class ProgressBar:
         else:
             print("Done.")
 
-    class RelativeCounter(progressbar.Widget):
-        def __init__(self, minval):
-            self.minval = minval
+    if HAS_PROGRESS_BAR:
+        class RelativeCounter(progressbar.Widget):
+            def __init__(self, minval):
+                self.minval = minval
 
-        def update(self, pbar):
-            return "{}".format(self.minval + pbar.currval)
+            def update(self, pbar):
+                return "{}".format(self.minval + pbar.currval)

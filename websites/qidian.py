@@ -7,7 +7,9 @@ from . import Website
 COOKIES_DATA_KEY = "qidian_cookies"
 
 BOOK_URL = "https://www.webnovel.com/book/{}"
-TOC_URL = "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken={}&bookId={}"
+TOC_URL = (
+    "https://www.webnovel.com/apiajax/chapter/GetChapterList?_csrfToken={}&bookId={}"
+)
 CHAPTER_URL = "https://www.webnovel.com/apiajax/chapter/GetContent?_csrfToken={}&bookId={}&chapterId={}"
 
 
@@ -22,15 +24,23 @@ class Qidian(Website):
     @classmethod
     def __get_csrf_token(cls, book_id):
         if not cls.csrf_token:
-            cls.csrf_token = requests.get(BOOK_URL.format(book_id)).cookies["_csrfToken"]
+            cls.csrf_token = requests.get(BOOK_URL.format(book_id)).cookies[
+                "_csrfToken"
+            ]
         return cls.csrf_token
 
     @classmethod
     def __download_toc(cls, book_id):
-        toc_json = requests.get(TOC_URL.format(cls.__get_csrf_token(book_id), book_id)).json()
+        toc_json = requests.get(
+            TOC_URL.format(cls.__get_csrf_token(book_id), book_id)
+        ).json()
 
         if toc_json["code"] != 0:
-            raise Exception("Recieved return code {} when trying to get TOC".format(toc_json["code"]))
+            raise Exception(
+                "Recieved return code {} when trying to get TOC".format(
+                    toc_json["code"]
+                )
+            )
 
         toc = [None]
 

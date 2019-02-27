@@ -28,12 +28,15 @@ _HTML_AFTER = """
 </html>
 """
 
+
 class HtmlConverter(BookConverter):
     name = "Html Converter"
 
     def process_chapter(self, ch):
         text = self.load_chapter(ch)
-        text = re.sub(r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL)
+        text = re.sub(
+            r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL
+        )
         text = text.replace("</sentence>", "</sentence><br /><br />")
         return text
 
@@ -47,14 +50,16 @@ class HtmlConverter(BookConverter):
             if ch in skip_chapters:
                 continue
             progress.update()
-            
+
             links = {
                 "title": self.book.upper() + " &mdash; " + utils.chapter_name(ch),
                 "prev": utils.chapter_name(ch - 1) + ".html",
-                "nxt": utils.chapter_name(ch + 1) + ".html"
+                "nxt": utils.chapter_name(ch + 1) + ".html",
             }
-            
-            with open(os.path.join(output_dir, utils.chapter_name(ch) + ".html"), "wb") as f:
+
+            with open(
+                os.path.join(output_dir, utils.chapter_name(ch) + ".html"), "wb"
+            ) as f:
                 before = _HTML_BEFORE.format(**links)
                 after = _HTML_AFTER.format(**links)
                 output = before + self.process_chapter(ch) + after
