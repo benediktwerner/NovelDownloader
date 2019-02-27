@@ -28,7 +28,6 @@ def create_config(book):
     config = {}
 
     print("Creating new config for {}:".format(book))
-    config["book"] = book
     config["website"] = _get_website()
 
     if config["website"] == websites.Qidian.name:
@@ -81,5 +80,5 @@ def load_config(book):
         config["chapter_url"] = config["url"]
 
     config.setdefault("base_url", config["website"].url)
-    config.setdefault("book", book)
+    config["book"] = book
     return config
