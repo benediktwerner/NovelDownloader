@@ -38,6 +38,7 @@ class HtmlConverter(BookConverter):
             r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL
         )
         text = text.replace("</sentence>", "</sentence><br /><br />")
+        text = re.sub(r"<script.*?</script>", "", text, flags=re.DOTALL)
         return text
 
     def convert_chapters(self, chapter_start, chapter_end):
