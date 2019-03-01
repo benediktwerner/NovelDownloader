@@ -186,9 +186,7 @@ class ProgressBar:
         if HAS_PROGRESS_BAR:
             widgets = [
                 text + " ",
-                ProgressBar.RelativeCounter(start),
-                " out of ",
-                str(end),
+                progressbar.SimpleProgress(" out of "),
                 " ",
                 progressbar.Percentage(),
                 " ",
@@ -216,12 +214,3 @@ class ProgressBar:
             self.progressbar.finish()
         else:
             print("Done.")
-
-    if HAS_PROGRESS_BAR:
-
-        class RelativeCounter(progressbar.Widget):
-            def __init__(self, minval):
-                self.minval = minval
-
-            def update(self, pbar):
-                return "{}".format(self.minval + pbar.currval)
