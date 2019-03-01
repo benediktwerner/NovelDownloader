@@ -178,9 +178,8 @@ def format_range(start, end):
 
 class ProgressBar:
     def __init__(self, start, end, text="Processing"):
-        self.minval = start
-        self.maxval = end
-        self.value = None
+        self.maxval = end - start + 1
+        self.value = 0
         self.text = text
 
         if HAS_PROGRESS_BAR:
@@ -196,16 +195,16 @@ class ProgressBar:
                 " ",
             ]
             self.progressbar = progressbar.ProgressBar(
-                widgets=widgets, maxval=end - start
+                widgets=widgets, maxval=maxval
             ).start()
 
     def update(self, newval=None):
         if newval is None:
-            newval = self.value + 1 if self.value is not None else self.minval
+            newval = self.value + 1
 
         self.value = newval
         if HAS_PROGRESS_BAR:
-            self.progressbar.update(newval - self.minval)
+            self.progressbar.update(newval)
         else:
             print(self.text, newval, "out of", self.maxval)
 
