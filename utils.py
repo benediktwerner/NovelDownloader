@@ -1,7 +1,6 @@
 import os
 import re
 import yaml
-from sys import stderr
 
 import config
 
@@ -21,10 +20,6 @@ DATA_FILE = "data.yml"
 MISSING_CHAPTER_NAME = "X"
 
 
-def print_error(*args):
-    print(*args, file=stderr)
-
-
 async def download_url(url, session, json=False, cookies=None):
     # header = {
     #     "User-Agent": 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7',
@@ -38,25 +33,6 @@ async def download_url(url, session, json=False, cookies=None):
 async def download_cookies(url, name, session):
     async with session.get(url) as response:
         return response.cookies[name].value
-
-
-def in_range(r, i):
-    """
-    Checks if the integer i is in the range r.
-    r is a string of the form "2-7".
-    """
-    a, b = map(int, r.split("-"))
-    return a <= i <= b
-
-
-def get_volume_from_chapter(c, volumes):
-    for v, r in enumerate(volumes):
-        if in_range(r, c):
-            return v + 1
-
-
-def get_chapters_from_volume(v, volumes):
-    return (int(x.strip()) for x in volumes[v - 1].split("-"))
 
 
 def get_book_dir(book, *subdirs):

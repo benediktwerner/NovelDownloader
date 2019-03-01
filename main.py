@@ -67,14 +67,9 @@ def download_chapters(conf):
 def convert_chapters(conf, chapter_start=None, chapter_end=None):
     print("Which chapters do you want to convert?")
 
-    if "volumes" in conf and utils.input_yes_no("Select by volume instead of chapters?"):
-        volume = utils.input_int("Which volume? ", 1, len(conf["volumes"]))
-        chapter_start, chapter_end = utils.get_chapters_from_volume(volume, conf["volumes"])
-        print("Converting volume", volume, "from chapter", chapter_start, "to", chapter_end)
-    else:
-        chapter_start = utils.input_int("First chapter? ", default=chapter_start)
-        chapter_end = utils.input_int("Last chapter? ", chapter_start, default=chapter_end)
-        print("Converting from chapter", chapter_start, "to", chapter_end)
+    chapter_start = utils.input_int("First chapter? ", default=chapter_start)
+    chapter_end = utils.input_int("Last chapter? ", chapter_start, default=chapter_end)
+    print("Converting from chapter", chapter_start, "to", chapter_end)
 
     print("\nBook converters:")
     for i, converter in enumerate(converters.CONVERTERS):
