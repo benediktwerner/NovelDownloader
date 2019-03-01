@@ -1,3 +1,5 @@
+import re
+
 import utils
 
 
@@ -51,3 +53,39 @@ for site in WEBSITES:
 
 def from_name(name):
     return WEBSITES_DICT[name]
+
+
+def from_config(config):
+    async def __download_toc(cls, session):
+        toc_page = await utils.download_url(cls.toc_url, session)
+
+        start = toc_page.find(cls.toc_start)
+        end = toc_page.find(cls.toc_end, start)
+        toc_page = toc_page[start:end]
+
+        return [None] + re.findall(cls.toc_link, toc_page)
+
+    async def prepare_download(cls, config, session):
+        if not cls.toc:
+            cls.toc = await cls.__download_toc(session)
+
+    def get_chapter_url(cls, chapter, config):
+        return cls.chapter_url + cls.toc[chapter]
+
+    return type(
+        "AnonymusWebsite",
+        (Website,),
+        {
+            "__download_toc": classmethod(__download_toc),
+            "prepare_download": classmethod(prepare_download),
+            "get_chapter_url": classmethod(get_chapter_url),
+            "toc": [],
+            "toc_url": config["toc_url"],
+            "toc_start": config["toc_start"],
+            "toc_end": config["toc_end"],
+            "toc_link": config["toc_link"],
+            "chapter_url": config["chapter_url"],
+            "chapter_separator_start": config["chapter_start"],
+            "chapter_separator_end": config["chapter_end"],
+        },
+    )

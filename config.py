@@ -5,13 +5,23 @@ import websites
 
 
 def _get_website():
-    while True:
-        website = input(
-            "Website? ({}) ".format(", ".join(w.name for w in websites.WEBSITES))
-        )
-        if website in websites.WEBSITES_DICT:
-            return website
-        print("Unknown website:", website)
+    print("[0] Custom")
+    for i, website in enumerate(websites.WEBSITES, 1):
+        print("[{}] {}".format(i, website.name))
+
+    website_index = utils.input_int("Website: ", 0, i)
+    if website_index > 0:
+        return websites.WEBSITES[website_index]
+
+    return {
+        "toc_url": input("TOC url: "),
+        "toc_start": input("TOC start: "),
+        "toc_end": input("TOC end: "),
+        "toc_link": input("TOC link regex (default: 'href=\"(.*?)\"'): ") or 'href="(.*?)"',
+        "chapter_url": input("Chapter url: "),
+        "chapter_start": input("Chapter start: "),
+        "chapter_end": input("Chapter end: "),
+    }
 
 
 def create_config(book):
@@ -44,8 +54,10 @@ def load_config(book):
     if "website" not in config:
         print("Warning: Config has no 'website' attribute")
         print("         Assuming 'wuxiaworld'")
-    else:
+    elif isinstance(config["website"], str):
         config["website"] = websites.from_name(config["website"])
+    else:
+        config["website"] = websites.from_config(config["website"])
 
     config["book"] = book
     return config
