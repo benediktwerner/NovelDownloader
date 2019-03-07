@@ -5,7 +5,6 @@ import utils
 
 class Website:
     name = None
-    url = None
 
     @classmethod
     def get_chapter_url(cls, chapter, config):

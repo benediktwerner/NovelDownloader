@@ -13,7 +13,6 @@ CHAPTER_URL = "https://www.webnovel.com/apiajax/chapter/GetContent?_csrfToken={}
 
 class Qidian(Website):
     name = "qidian"
-    url = "https://www.webnovels.com"
 
     csrf_token = None
     tocs = {}
