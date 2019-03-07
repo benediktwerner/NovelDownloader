@@ -6,13 +6,13 @@ import html
 
 
 _SPOILER_TEXT = 'class="collapseomatic_content'
-_OUTPUT_DIR = "kindle"
+_OUTPUT_DIR = "txt"
 _CHAPTER_SEPERATOR = "*****"
 _LINES_BETWEEN_CHAPTERS = 6
 
 
-class KindleConverter(BookConverter):
-    name = "Kindle Converter"
+class TxtConverter(BookConverter):
+    name = "txt Converter"
 
     def convert_chapters(self, chapter_start, chapter_end):
         name = self.conf.get("name", self.book)

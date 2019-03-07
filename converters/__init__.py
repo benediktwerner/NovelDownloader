@@ -25,6 +25,6 @@ class BookConverter:
 
 
 from .HtmlConverter import HtmlConverter
-from .KindleConverter import KindleConverter
+from .TxtConverter import TxtConverter
 
-CONVERTERS = [HtmlConverter, KindleConverter]
+CONVERTERS = [HtmlConverter, TxtConverter]
