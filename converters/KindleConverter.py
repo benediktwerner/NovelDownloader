@@ -49,7 +49,7 @@ class KindleConverter(BookConverter):
     def process_chapter(self, ch):
         text = self.load_chapter(ch)
 
-        text = re.sub("\n\s*", "", text)
+        text = re.sub(r"\n\s*", "", text)
         text = text.replace("<br>", "\n")
         text = text.replace("<br/>", "\n")
         text = text.replace("<br />", "\n")
