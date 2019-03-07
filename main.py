@@ -114,9 +114,12 @@ def main():
     if book is None:
         return
 
+    utils.update_data("last_book", book)
     utils.ensure_config(book)
     conf = config.load_config(book)
-    utils.update_data("last_book", book)
+
+    if conf is None:
+        return
 
     if "name" in conf:
         print("Selected", book, "-", conf["name"])

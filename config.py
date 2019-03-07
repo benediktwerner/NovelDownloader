@@ -11,13 +11,13 @@ def _get_website():
 
     website_index = utils.input_int("Website: ", 0, i)
     if website_index > 0:
-        return websites.WEBSITES[website_index]
+        return websites.WEBSITES[website_index - 1].name
 
     return {
         "toc_url": input("TOC url: "),
         "toc_start": input("TOC start: "),
         "toc_end": input("TOC end: "),
-        "toc_link": input("TOC link regex (default: 'href=\"(.*?)\"'): ") or 'href="(.*?)"',
+        "toc_link": input("TOC link regex (optional): ") or 'href="(.*?)"',
         "chapter_url": input("Chapter url: "),
         "chapter_start": input("Chapter start: "),
         "chapter_end": input("Chapter end: "),
@@ -36,7 +36,7 @@ def create_config(book):
     if name:
         config["name"] = name
 
-    add_chapter_titles = utils.input_yes_no("Add chapter titles?", False)
+    add_chapter_titles = utils.input_yes_no("Add additional chapter titles?", False)
     if add_chapter_titles:
         config["add_chapter_titles"] = True
 
@@ -56,8 +56,14 @@ def load_config(book):
         print("         Assuming 'wuxiaworld'")
     elif isinstance(config["website"], str):
         config["website"] = websites.from_name(config["website"])
-    else:
+    elif isinstance(config["website"], dict):
         config["website"] = websites.from_config(config["website"])
+    else:
+        print("Error: Config has an invalid 'website' attribute")
+        print("       of type", type(config["website"]))
+        print("       A valid value is either the name of a supported website")
+        print("       or a dictionary declaring a custom website")
+        return None
 
     config["book"] = book
     return config
