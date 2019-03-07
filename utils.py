@@ -30,7 +30,7 @@ async def download_url(url, session, json=False, cookies=None):
         return await response.text()
 
 
-async def download_cookies(url, name, session):
+async def download_cookie(url, name, session):
     async with session.get(url) as response:
         return response.cookies[name].value
 
