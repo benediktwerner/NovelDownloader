@@ -127,6 +127,10 @@ def update_data(key, value):
 
 
 def list_books():
+    if not os.path.isdir(BASE_DIR):
+        print("No books.")
+        return
+
     for book in sorted(os.listdir(BASE_DIR)):
         if os.path.isfile(get_config_file(book)):
             conf = config.load_config(book)
@@ -174,6 +178,7 @@ def format_range(start, end):
     if start == end:
         return str(start)
     return "{}-{}".format(start, end)
+
 
 def format_list(ls):
     if len(ls) == 1:
