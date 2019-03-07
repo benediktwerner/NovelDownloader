@@ -1,3 +1,5 @@
 pyyaml
 progressbar33
 aiohttp
+aiodns
+cchardet
