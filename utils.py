@@ -195,7 +195,7 @@ class ProgressBar:
         if HAS_PROGRESS_BAR:
             widgets = [
                 text + " ",
-                progressbar.SimpleProgress(" out of "),
+                progressbar.SimpleProgress(),
                 " ",
                 progressbar.Percentage(),
                 " ",
@@ -205,7 +205,7 @@ class ProgressBar:
                 " ",
             ]
             self.progressbar = progressbar.ProgressBar(
-                widgets=widgets, maxval=self.maxval
+                widgets=widgets, max_value=self.maxval
             ).start()
 
     def update(self, newval=None):
