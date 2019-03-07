@@ -26,7 +26,7 @@ async def download_url(url, session, json=False, cookies=None):
     # }
     async with session.get(url, cookies=cookies) as response:
         if json:
-            return await response.json()
+            return await response.json(content_type=None)
         return await response.text()
 
 
