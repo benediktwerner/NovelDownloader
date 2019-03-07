@@ -12,7 +12,7 @@ _LINES_BETWEEN_CHAPTERS = 6
 
 
 class TxtConverter(BookConverter):
-    name = "txt Converter"
+    name = "TXT Converter"
 
     def convert_chapters(self, chapter_start, chapter_end):
         name = self.conf.get("name", self.book)

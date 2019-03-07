@@ -139,6 +139,7 @@ def main():
         if downloaded_chapters is None:
             return
 
+        print()
         if not utils.input_yes_no("Do you also want to convert chapters?"):
             print("Ok. Bye.")
             return

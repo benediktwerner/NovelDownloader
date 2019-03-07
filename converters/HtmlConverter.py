@@ -30,7 +30,7 @@ _HTML_AFTER = """
 
 
 class HtmlConverter(BookConverter):
-    name = "Html Converter"
+    name = "HTML Converter"
 
     def process_chapter(self, ch):
         text = self.load_chapter(ch)
