@@ -205,7 +205,7 @@ class ProgressBar:
                 " ",
             ]
             self.progressbar = progressbar.ProgressBar(
-                widgets=widgets, maxval=maxval
+                widgets=widgets, maxval=self.maxval
             ).start()
 
     def update(self, newval=None):
