@@ -8,22 +8,42 @@ import downloader
 import os
 
 
+HELP_ACTIONS = ("?", "help")
+LIST_ACTIONS = ("l", "ls", "list")
 QUIT_ACTIONS = ("q", "quit", "exit")
+
+HELP = """\
+Enter a book's shortname to download or convert chapters for it.
+If no local info for the book exists it will be created.
+
+Enter nothing to select the last used book.
+
+Enter {list_actions} to list all books on this device.
+Enter {help_actions} to show this help.
+Enter {quit_actions} to quit.
+""".format(
+    list_actions=utils.format_list(LIST_ACTIONS),
+    help_actions=utils.format_list(HELP_ACTIONS),
+    quit_actions=utils.format_list(QUIT_ACTIONS),
+)
 
 
 def choose_book():
-    print("Enter a book or '?' to list all current books:")
+    print("Enter a book or '?' for help:")
 
-    action = input("> ")
-
-    if action == "?":
-        utils.list_books()
-        print()
+    while True:
         action = input("> ")
 
-    if action in QUIT_ACTIONS:
-        print("Bye.")
-        return None
+        if action in HELP_ACTIONS:
+            print(HELP)
+        elif action in LIST_ACTIONS:
+            utils.list_books()
+            print()
+        elif action in QUIT_ACTIONS:
+            print("Bye.")
+            return None
+        else:
+            break
 
     book = action
 
@@ -40,7 +60,9 @@ def choose_book():
     book_dir = utils.get_book_dir(book)
 
     if not os.path.isdir(book_dir):
-        if not utils.input_yes_no("The book '{}' does not exist. Do you want to create it?".format(book)):
+        if not utils.input_yes_no(
+            "The book '{}' does not exist. Do you want to create it?".format(book)
+        ):
             print("Ok. Bye.")
             return None
 
@@ -54,7 +76,9 @@ def download_chapters(conf):
     print("Which chapters do you want to download?")
 
     chapter_start = utils.input_int("First chapter? ")
-    chapter_end = utils.input_int("Last chapter? ", minval=chapter_start, default=chapter_start)
+    chapter_end = utils.input_int(
+        "Last chapter? ", minval=chapter_start, default=chapter_start
+    )
 
     try:
         downloader.download_chapters(chapter_start, chapter_end, conf)
@@ -66,6 +90,8 @@ def download_chapters(conf):
 
 def convert_chapters(conf, chapter_start=None, chapter_end=None):
     print("Which chapters do you want to convert?")
+    if chapter_start is not None and chapter_end is not None:
+        print("Enter nothing to convert the chapters just downloaded.")
 
     chapter_start = utils.input_int("First chapter? ", default=chapter_start)
     chapter_end = utils.input_int("Last chapter? ", chapter_start, default=chapter_end)
@@ -76,7 +102,9 @@ def convert_chapters(conf, chapter_start=None, chapter_end=None):
         print("[{}] {}".format(i, converter.name))
 
     converter_id = utils.input_int("Converter: ", 0, i)
-    converters.CONVERTERS[converter_id](conf).convert_chapters(chapter_start, chapter_end)
+    converters.CONVERTERS[converter_id](conf).convert_chapters(
+        chapter_start, chapter_end
+    )
 
 
 def main():

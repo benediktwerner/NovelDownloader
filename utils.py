@@ -175,6 +175,11 @@ def format_range(start, end):
         return str(start)
     return "{}-{}".format(start, end)
 
+def format_list(ls):
+    if len(ls) == 1:
+        return "'{}'".format(ls[0])
+    return "'{}' or '{}'".format("', '".join(ls[:-1]), ls[-1])
+
 
 class ProgressBar:
     def __init__(self, start, end, text="Processing"):
