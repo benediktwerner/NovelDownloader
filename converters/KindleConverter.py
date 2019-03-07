@@ -45,6 +45,7 @@ class KindleConverter(BookConverter):
                         ).encode()
                     )
         progress.finish()
+        print("Result is in '{}'".format(output_file))
 
     def process_chapter(self, ch):
         text = self.load_chapter(ch)

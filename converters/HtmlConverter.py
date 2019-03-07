@@ -66,3 +66,4 @@ class HtmlConverter(BookConverter):
                 output = before + self.process_chapter(ch) + after
                 f.write(output.encode("utf-8"))
         progress.finish()
+        print("Result is in '{}'".format(output_dir))
