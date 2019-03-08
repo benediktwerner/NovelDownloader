@@ -77,7 +77,12 @@ class Qidian(Website):
             elif content["data"]["chapterInfo"]["isAuth"] == 0:
                 raise Exception("Failed to authorize chapter {}".format(url))
 
-        return content["data"]["chapterInfo"]["content"]
+        chapter_index = content["data"]["chapterInfo"]["chapterIndex"]
+        chapter_name = content["data"]["chapterInfo"]["chapterName"]
+        chapter_content = content["data"]["chapterInfo"]["content"]
+
+        chapter_title = f"<strong>Chapter {chapter_index}: {chapter_name}</strong><br />"
+        return chapter_title + chapter_content
 
     @classmethod
     def __get_cookies(cls):
