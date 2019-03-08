@@ -24,7 +24,7 @@ class TxtConverter(BookConverter):
         skip_chapters = self.conf.get("skip_chapters", [])
 
         utils.ensure_dir(utils.get_book_dir(self.book, _OUTPUT_DIR))
-        progress = utils.ProgressBar(chapter_start, chapter_end, "Converting")
+        progress = utils.ProgressBar(chapter_end - chapter_start + 1, "Converting")
 
         with open(output_file, "wb") as f:
             f.write("{}\n\n\n".format(title).encode())

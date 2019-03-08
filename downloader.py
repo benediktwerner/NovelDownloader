@@ -9,7 +9,7 @@ import utils
 import websites
 
 
-async def download_chapter(chapter, config, progress, session):
+async def __download_chapter(chapter, config, progress, session):
 
     content = await config["website"].download_chapter(chapter, config, session)
 
@@ -32,7 +32,7 @@ async def download_chapter(chapter, config, progress, session):
     progress.update()
 
 
-async def __download_chapters(chapter_start, chapter_end, config):
+async def __download_chapters(chapter_list, config):
     raw_dir = utils.get_raw_dir(config["book"])
     utils.ensure_dir(raw_dir)
 
@@ -40,18 +40,23 @@ async def __download_chapters(chapter_start, chapter_end, config):
         print("\nPreparing download ...\r", end="", flush=True)
         await config["website"].prepare_download(config, session)
 
-        progress = utils.ProgressBar(chapter_start, chapter_end, "Downloading")
+        progress = utils.ProgressBar(len(chapter_list), "Downloading")
 
         tasks = []
-        for ch in range(chapter_start, chapter_end + 1):
-            tasks.append(download_chapter(ch, config, progress, session))
+        for ch in chapter_list:
+            tasks.append(__download_chapter(ch, config, progress, session))
 
         await asyncio.gather(*tasks)
 
         progress.finish()
 
 
-def download_chapters(chapter_start, chapter_end, config):
-    asyncio.get_event_loop().run_until_complete(
-        __download_chapters(chapter_start, chapter_end, config)
-    )
+def download_chapters(chapter_list, config):
+    try:
+        asyncio.get_event_loop().run_until_complete(
+            __download_chapters(chapter_list, config)
+        )
+        return True
+    except aiohttp.client_exceptions.ClientConnectorError as e:
+        print("Error:", e)
+        return False

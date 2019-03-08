@@ -80,9 +80,23 @@ def download_chapters(conf):
         "Last chapter? ", minval=chapter_start, default=chapter_start
     )
 
+    chapters_on_disk = utils.get_chapters_on_disk(conf["book"])
+    chapters = list(range(chapter_start, chapter_end + 1))
+
+    if any(ch in chapters_on_disk for ch in chapters):
+        if not utils.input_yes_no(
+            "Some of these chapters are already on disk. Do you want to redownload them?"
+        ):
+            chapters = [ch for ch in chapters if ch not in chapters_on_disk]
+            if not chapters:
+                print("All chapters are already on disk. Bye.")
+                return None
+
     try:
-        downloader.download_chapters(chapter_start, chapter_end, conf)
-        return chapter_start, chapter_end
+        result = downloader.download_chapters(chapters, conf)
+        if result:
+            return chapter_start, chapter_end
+        return None
     except:
         print()
         raise
@@ -126,10 +140,10 @@ def main():
     else:
         print("Selected", book)
 
-    chapters = utils.get_chapter_list(book)
+    chapters = utils.get_chapters_on_disk(book)
     if chapters:
         print("Chapters on disk:")
-        print(", ".join(utils.format_range(*x) for x in chapters))
+        print(", ".join(utils.format_range(*x) for x in utils.group_chapters(chapters)))
     else:
         print("No chapters on disk")
     print()

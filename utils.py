@@ -141,23 +141,8 @@ def list_books():
         print(book)
 
 
-def get_chapter_list(book, directory=RAW_DIR_NAME):
-    directory = get_book_dir(book, directory)
-    chapters = []
-
-    if not os.path.isdir(directory):
-        return chapters
-
-    for chapter_name in os.listdir(directory):
-        match = re.match(r"chapter-(\d+)", chapter_name)
-        if match and match.groups() is not None:
-            chapters.append(int(match.group(1)))
-
-    if not chapters:
-        return chapters
-
-    chapters.sort()
-
+def group_chapters(chapters):
+    chapters = list(sorted(chapters))
     groups = []
     curr_min = chapters[0]
     curr_max = chapters[0]
@@ -174,6 +159,21 @@ def get_chapter_list(book, directory=RAW_DIR_NAME):
     return groups
 
 
+def get_chapters_on_disk(book):
+    directory = get_raw_dir(book)
+    chapters = set()
+
+    if not os.path.isdir(directory):
+        return chapters
+
+    for chapter_name in os.listdir(directory):
+        match = re.match(r"chapter-(\d+)", chapter_name)
+        if match and match.groups() is not None:
+            chapters.add(int(match.group(1)))
+
+    return chapters
+
+
 def format_range(start, end):
     if start == end:
         return str(start)
@@ -187,8 +187,8 @@ def format_list(ls):
 
 
 class ProgressBar:
-    def __init__(self, start, end, text="Processing"):
-        self.maxval = end - start + 1
+    def __init__(self, maxval, text="Processing"):
+        self.maxval = maxval
         self.value = 0
         self.text = text
 
