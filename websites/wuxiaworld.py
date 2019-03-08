@@ -4,6 +4,7 @@ import utils
 from . import Website
 
 
+BASE_URL = "https://www.wuxiaworld.com"
 TOC_URL = "https://www.wuxiaworld.com/novel/{}"
 
 TOC_START = "list-chapters"
@@ -36,4 +37,4 @@ class Wuxiaworld(Website):
 
     @classmethod
     def get_chapter_url(cls, chapter, config):
-        return Wuxiaworld.url + cls.tocs[config["book_id"]][chapter]
+        return BASE_URL + cls.tocs[config["book_id"]][chapter]
