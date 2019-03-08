@@ -109,6 +109,26 @@ def convert_chapters(conf, chapter_start=None, chapter_end=None):
 
     chapter_start = utils.input_int("First chapter? ", default=chapter_start)
     chapter_end = utils.input_int("Last chapter? ", chapter_start, default=chapter_end)
+
+    chapters = set(range(chapter_start, chapter_end + 1))
+    chapters_on_disk = utils.get_chapters_on_disk(conf["book"])
+    missing_chapters = chapters - chapters_on_disk
+
+    if missing_chapters:
+        print("The following chapters are not on disk:")
+        print(utils.format_range_list(utils.group_chapters(missing_chapters)))
+
+        available_chapters = utils.group_chapters(chapters - missing_chapters)
+        new_range = max(available_chapters, key=len)
+
+        if utils.input_yes_no(
+            f"Do you want to convert {utils.format_range_list(new_range)} instead?"
+        ):
+            chapter_start, chapter_end = new_range
+        else:
+            print("Ok. Bye.")
+            return
+
     print("Converting from chapter", chapter_start, "to", chapter_end)
 
     print("\nBook converters:")
@@ -143,7 +163,7 @@ def main():
     chapters = utils.get_chapters_on_disk(book)
     if chapters:
         print("Chapters on disk:")
-        print(", ".join(utils.format_range(*x) for x in utils.group_chapters(chapters)))
+        print(utils.format_range_list(utils.group_chapters(chapters)))
     else:
         print("No chapters on disk")
     print()

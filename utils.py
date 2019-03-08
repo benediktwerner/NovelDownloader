@@ -180,6 +180,10 @@ def format_range(start, end):
     return "{}-{}".format(start, end)
 
 
+def format_range_list(range_list):
+    return ", ".join(format_range(*r) for r in range_list)
+
+
 def format_list(ls):
     if len(ls) == 1:
         return "'{}'".format(ls[0])
