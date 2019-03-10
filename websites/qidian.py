@@ -1,6 +1,13 @@
-import utils
-from . import Website
+from __future__ import annotations
 
+from typing import Dict, List
+
+from aiohttp import ClientSession
+
+import config
+import utils
+
+from . import Website
 
 COOKIES_DATA_KEY = "qidian_cookies"
 
@@ -15,61 +22,56 @@ class Qidian(Website):
     name = "qidian"
 
     csrf_token = None
-    tocs = {}
-    cookies = {}
+    tocs: Dict[str, Dict[int, str]] = {}
+    cookies: Dict[str, str] = {}
 
-    @classmethod
-    async def __download_toc(cls, book_id, session):
-        toc_json = await utils.download_url(
-            TOC_URL.format(cls.csrf_token, book_id), session, json=True
+    async def __download_toc(
+        self, book_id: str, session: ClientSession
+    ) -> Dict[int, str]:
+        toc_json = await utils.download_json(
+            TOC_URL.format(self.csrf_token, book_id), session
         )
 
         if toc_json["code"] != 0:
             raise Exception(
-                "Recieved return code {} when trying to get TOC".format(
-                    toc_json["code"]
-                )
+                f"Recieved return code {toc_json['code']} when trying to get TOC"
             )
 
-        toc = [None]
+        toc = {}
 
         for volume in toc_json["data"]["volumeItems"]:
             for chapter in volume["chapterItems"]:
-                toc.append(chapter["id"])
+                toc[chapter["index"]] = chapter["id"]
 
         return toc
 
-    @classmethod
-    async def prepare_download(cls, config, session):
-        book_id = config["book_id"]
-        if not cls.csrf_token:
-            cls.csrf_token = await utils.download_cookie(
+    async def prepare_download(self, config: config.Config, session: ClientSession):
+        book_id = config.book_id
+        if not self.csrf_token:
+            self.csrf_token = await utils.download_cookie(
                 BOOK_URL.format(book_id), "_csrfToken", session
             )
 
-        if book_id not in cls.tocs:
-            cls.tocs[book_id] = await cls.__download_toc(book_id, session)
+        if config.book_id not in self.tocs:
+            self.tocs[book_id] = await self.__download_toc(book_id, session)
 
-    @classmethod
-    def get_chapter_url(cls, chapter, config):
-        book_id = config["book_id"]
-        chapter_id = cls.tocs[book_id][chapter]
-        return CHAPTER_URL.format(cls.csrf_token, book_id, chapter_id)
+    def get_chapter_url(self, chapter: int, config: config.Config) -> str:
+        chapter_id = self.tocs[config.book_id][chapter]
+        return CHAPTER_URL.format(self.csrf_token, config.book_id, chapter_id)
 
-    @classmethod
-    async def download_chapter(cls, chapter, config, session):
-        url = cls.get_chapter_url(chapter, config)
+    async def download_chapter(
+        self, chapter: int, config: config.Config, session: ClientSession
+    ) -> str:
+        url = self.get_chapter_url(chapter, config)
 
-        content = await utils.download_url(
-            url, session, json=True, cookies=cls.__get_cookies()
-        )
+        content = await utils.download_json(url, session, cookies=self.__get_cookies())
         if not content:
             raise Exception("Failed to download chapter from {}".format(url))
 
         if content["data"]["chapterInfo"]["isAuth"] == 0:
-            cls.__update_cookies()
-            content = utils.download_url(
-                url, session, json=True, cookies=cls.__get_cookies()
+            self.__update_cookies()
+            content = await utils.download_json(
+                url, session, cookies=self.__get_cookies()
             )
 
             if content is None:
@@ -81,32 +83,34 @@ class Qidian(Website):
         chapter_name = content["data"]["chapterInfo"]["chapterName"]
         chapter_content = content["data"]["chapterInfo"]["content"]
 
-        chapter_title = f"<strong>Chapter {chapter_index}: {chapter_name}</strong><br />"
+        chapter_title = (
+            f"<strong>Chapter {chapter_index}: {chapter_name}</strong><br />"
+        )
         return chapter_title + chapter_content
 
     @classmethod
-    def __get_cookies(cls):
-        if not cls.cookies:
-            cls.cookies = utils.get_data(COOKIES_DATA_KEY)
-        return cls.cookies
+    def __get_cookies(self) -> Dict[str, str]:
+        if not self.cookies:
+            self.cookies = utils.get_data(COOKIES_DATA_KEY)
+        return self.cookies
 
     @classmethod
-    def __update_cookies(cls):
+    def __update_cookies(self):
         print("\n")
-        if "uuid" in cls.cookies:
-            if "ukey" in cls.cookies:
+        if "uuid" in self.cookies:
+            if "ukey" in self.cookies:
                 print("Qidian cookie expired!")
                 ukey = input("Enter new ukey: ")
-                cls.cookies["ukey"] = ukey
+                self.cookies["ukey"] = ukey
             else:
                 print("Qidian cookie incomplete!")
-                cls.cookies["ukey"] = input("Enter ukey: ")
-        elif "ukey" in cls.cookies:
+                self.cookies["ukey"] = input("Enter ukey: ")
+        elif "ukey" in self.cookies:
             print("Qidian cookie incomplete!")
-            cls.cookies["uuid"] = input("Enter uuid: ")
+            self.cookies["uuid"] = input("Enter uuid: ")
         else:
             print("Qidian requires a cookie!")
-            cls.cookies["uuid"] = input("Enter uuid: ")
-            cls.cookies["ukey"] = input("Enter ukey: ")
+            self.cookies["uuid"] = input("Enter uuid: ")
+            self.cookies["ukey"] = input("Enter ukey: ")
 
-        utils.update_data(COOKIES_DATA_KEY, cls.cookies)
+        utils.update_data(COOKIES_DATA_KEY, self.cookies)

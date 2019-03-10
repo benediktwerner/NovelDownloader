@@ -1,8 +1,14 @@
+from __future__ import annotations
+
 import re
+from typing import Dict
 
+from aiohttp import ClientSession
+
+import config
 import utils
-from . import Website
 
+from . import Website
 
 BASE_URL = "https://www.wuxiaworld.com"
 TOC_URL = "https://www.wuxiaworld.com/novel/{}"
@@ -17,24 +23,27 @@ class Wuxiaworld(Website):
     chapter_separator_start = '<div class="fr-view">'
     chapter_separator_end = '<a href="/novel/'
 
-    tocs = {}
+    tocs: Dict[str, Dict[int, str]] = {}
 
-    @classmethod
-    async def __download_toc(cls, book_id, session):
+    async def __download_toc(
+        self, book_id: str, session: ClientSession
+    ) -> Dict[int, str]:
         toc_page = await utils.download_url(TOC_URL.format(book_id), session)
 
         start = toc_page.find(TOC_START)
         end = toc_page.find(TOC_END, start)
         toc_page = toc_page[start:end]
 
-        return [None] + re.findall('"(/novel/.*?)"', toc_page)
+        toc = {}
+        for ch, url in re.findall('"(/novel/.*?)"', toc_page):
+            toc[ch] = url
 
-    @classmethod
-    async def prepare_download(cls, config, session):
-        book_id = config["book_id"]
-        if book_id not in cls.tocs:
-            cls.tocs[book_id] = await cls.__download_toc(book_id, session)
+        return toc
 
-    @classmethod
-    def get_chapter_url(cls, chapter, config):
-        return BASE_URL + cls.tocs[config["book_id"]][chapter]
+    async def prepare_download(self, config: config.Config, session: ClientSession):
+        book_id = config.book_id
+        if book_id not in self.tocs:
+            self.tocs[book_id] = await self.__download_toc(book_id, session)
+
+    def get_chapter_url(self, chapter: int, config: config.Config) -> str:
+        return BASE_URL + self.tocs[config.book_id][chapter]

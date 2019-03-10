@@ -1,6 +1,9 @@
 import os
 import re
+from typing import Any, Iterable, List, Optional, Sequence, Set, Tuple
+
 import yaml
+from aiohttp import ClientSession
 
 import config
 
@@ -20,39 +23,39 @@ DATA_FILE = "data.yml"
 MISSING_CHAPTER_NAME = "X"
 
 
-async def download_url(url, session, json=False, cookies=None):
-    # header = {
-    #     "User-Agent": 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.7) Gecko/2009021910 Firefox/3.0.7',
-    # }
+async def download_url(url: str, session: ClientSession, cookies: dict = None) -> str:
     async with session.get(url, cookies=cookies) as response:
-        if json:
-            return await response.json(encoding="utf-8", content_type=None)
         return await response.text(encoding="utf-8")
 
 
-async def download_cookie(url, name, session):
+async def download_json(url: str, session: ClientSession, cookies: dict = None) -> dict:
+    async with session.get(url, cookies=cookies) as response:
+        return await response.json(encoding="utf-8", content_type=None)
+
+
+async def download_cookie(url: str, name: str, session: ClientSession) -> str:
     async with session.get(url) as response:
         return response.cookies[name].value
 
 
-def get_book_dir(book, *subdirs):
+def get_book_dir(book: str, *subdirs: str) -> str:
     return os.path.join(BASE_DIR, book.lower(), *subdirs)
 
 
-def get_config_file(book):
+def get_config_file(book: str) -> str:
     return get_book_dir(book, CONFIG_FILE_NAME)
 
 
-def get_raw_dir(book):
+def get_raw_dir(book: str) -> str:
     return get_book_dir(book, RAW_DIR_NAME)
 
 
-def ensure_config(book):
+def ensure_config(book: str):
     if not os.path.isfile(get_config_file(book)):
         config.create_config(book)
 
 
-def input_yes_no(text, default=True):
+def input_yes_no(text: str, default: bool = True) -> bool:
     text = text.rstrip()
     help_text = " (Y/n) " if default else " (y/N) "
     user_input = input(text + help_text)
@@ -67,7 +70,9 @@ def input_yes_no(text, default=True):
     return default
 
 
-def input_int(text, minval=None, maxval=None, default=None):
+def input_int(
+    text: str, minval: int = None, maxval: int = None, default: int = None
+) -> int:
     user_input = input(text)
 
     while True:
@@ -90,35 +95,35 @@ def input_int(text, minval=None, maxval=None, default=None):
             user_input = input(text + "(Please enter a valid number) ")
 
 
-def ensure_dir(directory):
+def ensure_dir(directory: str):
     if not os.path.isdir(directory):
         os.makedirs(directory)
 
 
-def chapter_name(chapter):
-    return "chapter-{}".format(chapter)
+def chapter_name(chapter: int) -> str:
+    return f"chapter-{chapter}"
 
 
-def load_data():
+def load_data() -> Optional[dict]:
     if os.path.isfile(DATA_FILE):
         with open(DATA_FILE) as f:
             return yaml.load(f)
     return None
 
 
-def save_data(data):
+def save_data(data: dict):
     with open(DATA_FILE, "w") as f:
         yaml.dump(data, f, default_flow_style=False)
 
 
-def get_data(key):
+def get_data(key: str) -> Any:
     data = load_data()
     if data and key in data:
         return data[key]
     return None
 
 
-def update_data(key, value):
+def update_data(key: str, value: Any):
     data = load_data()
     if not data:
         data = {}
@@ -134,14 +139,14 @@ def list_books():
     for book in sorted(os.listdir(BASE_DIR)):
         if os.path.isfile(get_config_file(book)):
             conf = config.load_config(book)
-            if "name" in conf:
-                print(book, "-", conf["name"])
+            if conf.name:
+                print(book, "-", conf.name)
                 continue
 
         print(book)
 
 
-def group_chapters(chapters):
+def group_chapters(chapters: Iterable[int]) -> List[Tuple[int, int]]:
     chapters = list(sorted(chapters))
     groups = []
     curr_min = chapters[0]
@@ -159,9 +164,9 @@ def group_chapters(chapters):
     return groups
 
 
-def get_chapters_on_disk(book):
+def get_chapters_on_disk(book: str) -> Set[int]:
     directory = get_raw_dir(book)
-    chapters = set()
+    chapters: Set[int] = set()
 
     if not os.path.isdir(directory):
         return chapters
@@ -174,24 +179,26 @@ def get_chapters_on_disk(book):
     return chapters
 
 
-def format_range(start, end):
+def format_range(start: int, end: int) -> str:
     if start == end:
         return str(start)
-    return "{}-{}".format(start, end)
+    return f"{start}-{end}"
 
 
-def format_range_list(range_list):
+def format_range_list(range_list: Sequence[Tuple[int, int]]) -> str:
     return ", ".join(format_range(*r) for r in range_list)
 
 
-def format_list(ls):
+def format_list(ls: Sequence) -> str:
     if len(ls) == 1:
-        return "'{}'".format(ls[0])
-    return "'{}' or '{}'".format("', '".join(ls[:-1]), ls[-1])
+        return f"'{ls[0]}'"
+
+    joined = "', '".join(ls[:-1])
+    return f"'{joined}' or '{ls[-1]}'"
 
 
 class ProgressBar:
-    def __init__(self, maxval, text="Processing"):
+    def __init__(self, maxval: int, text: str = "Processing"):
         self.maxval = maxval
         self.value = 0
         self.text = text
@@ -212,7 +219,7 @@ class ProgressBar:
                 widgets=widgets, max_value=self.maxval
             ).start()
 
-    def update(self, newval=None):
+    def update(self, newval: int = None):
         if newval is None:
             newval = self.value + 1
 

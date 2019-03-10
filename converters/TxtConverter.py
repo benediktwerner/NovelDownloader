@@ -1,9 +1,9 @@
-import utils
-from . import BookConverter
-
-import re
 import html
+import re
 
+import utils
+
+from . import BookConverter
 
 _SPOILER_TEXT = 'class="collapseomatic_content'
 _OUTPUT_DIR = "txt"
@@ -14,27 +14,28 @@ _LINES_BETWEEN_CHAPTERS = 6
 class TxtConverter(BookConverter):
     name = "TXT Converter"
 
-    def convert_chapters(self, chapter_start, chapter_end):
-        name = self.conf.get("name", self.book)
+    def convert_chapters(self, chapter_start: int, chapter_end: int):
+        name = self.config.name or self.config.book
         file_name = "{} - Chapters {}-{}.txt".format(
-            name if len(name) <= 20 else self.book.upper(), chapter_start, chapter_end
+            name if len(name) <= 20 else self.config.book.upper(),
+            chapter_start,
+            chapter_end,
         )
-        output_file = utils.get_book_dir(self.book, _OUTPUT_DIR, file_name)
-        title = "{} - Chapters {}-{}".format(name, chapter_start, chapter_end)
-        skip_chapters = self.conf.get("skip_chapters", [])
+        output_file = utils.get_book_dir(self.config.book, _OUTPUT_DIR, file_name)
+        title = f"{name} - Chapters {chapter_start}-{chapter_end}"
 
-        utils.ensure_dir(utils.get_book_dir(self.book, _OUTPUT_DIR))
+        utils.ensure_dir(utils.get_book_dir(self.config.book, _OUTPUT_DIR))
         progress = utils.ProgressBar(chapter_end - chapter_start + 1, "Converting")
 
         with open(output_file, "wb") as f:
             f.write("{}\n\n\n".format(title).encode())
 
             for ch in range(chapter_start, chapter_end + 1):
-                if ch in skip_chapters:
+                if ch in self.config.skip_chapters:
                     continue
 
                 progress.update()
-                if self.conf.get("add_chapter_titles", False):
+                if self.config.add_chapter_titles:
                     f.write("Chapter {}\n\n".format(ch).encode())
                 f.write(self.process_chapter(ch).encode())
 
@@ -47,7 +48,7 @@ class TxtConverter(BookConverter):
         progress.finish()
         print("Result is in '{}'".format(output_file))
 
-    def process_chapter(self, ch):
+    def process_chapter(self, ch: int) -> str:
         text = self.load_chapter(ch)
 
         text = re.sub(r"\n\s*", "", text)

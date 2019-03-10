@@ -1,90 +1,88 @@
-import re
+from __future__ import annotations
 
+import re
+from abc import ABC, abstractmethod
+from typing import Dict, Optional, Union
+
+from aiohttp import ClientSession
+
+import config
 import utils
 
 
-class Website:
-    name = None
+class Website(ABC):
+    name: str
+    chapter_separator_start: str
+    chapter_separator_end: str
 
-    @classmethod
-    def get_chapter_url(cls, chapter, config):
-        raise NotImplementedError
-
-    chapter_separator_start = None
-    chapter_separator_end = None
-
-    @classmethod
-    async def prepare_download(cls, config, session):
+    @abstractmethod
+    def get_chapter_url(self, chapter: int, config: config.Config) -> str:
         pass
 
-    @classmethod
-    async def download_chapter(cls, chapter, config, session):
-        url = cls.get_chapter_url(chapter, config)
+    async def prepare_download(self, config: config.Config, session: ClientSession):
+        pass
+
+    async def download_chapter(
+        self, chapter: int, config: config.Config, session: ClientSession
+    ) -> Optional[str]:
+        url = self.get_chapter_url(chapter, config)
 
         content = await utils.download_url(url, session)
         if content is None:
             raise Exception("Failed to download chapter from {}".format(url))
 
-        return cls.extract_chapter_content(content)
+        return self.extract_chapter_content(content)
 
-    @classmethod
-    def extract_chapter_content(cls, content):
-        content_start = content.find(cls.chapter_separator_start)
-        content_end = content.find(cls.chapter_separator_end, content_start)
+    def extract_chapter_content(self, content: str) -> Optional[str]:
+        content_start = content.find(self.chapter_separator_start)
+        content_end = content.find(self.chapter_separator_end, content_start)
 
         if content_start == -1 or content_end == -1 or content_start >= content_end:
             return None
 
-        return content[content_start + len(cls.chapter_separator_start) : content_end]
+        return content[content_start + len(self.chapter_separator_start) : content_end]
+
+
+class AnonymusWebsite(Website):
+    def __init__(self, config):
+        self.toc = []
+        self.toc_url = config["toc_url"]
+        self.toc_start = config["toc_start"]
+        self.toc_end = config["toc_end"]
+        self.toc_link = config["toc_link"]
+        self.chapter_url = config["chapter_url"]
+        self.chapter_separator_start = config["chapter_start"]
+        self.chapter_separator_end = config["chapter_end"]
+
+    async def __download_toc(self, session: ClientSession):
+        toc_page = await utils.download_url(self.toc_url, session)
+
+        start = toc_page.find(self.toc_start)
+        end = toc_page.find(self.toc_end, start)
+        toc_page = toc_page[start:end]
+
+        return [None] + re.findall(self.toc_link, toc_page)
+
+    async def prepare_download(self, config: config.Config, session: ClientSession):
+        if not self.toc:
+            self.toc = await self.__download_toc(session)
+
+    def get_chapter_url(self, chapter, config):
+        return self.chapter_url + self.toc[chapter]
 
 
 from .qidian import Qidian
 from .wuxiaworld import Wuxiaworld
 
+WEBSITES = [Wuxiaworld(), Qidian()]
 
-WEBSITES = [Qidian, Wuxiaworld]
-
-WEBSITES_DICT = {}
+WEBSITES_DICT: Dict[str, Website] = {}
 
 for site in WEBSITES:
     WEBSITES_DICT[site.name] = site
 
 
-def from_name(name):
-    return WEBSITES_DICT[name]
-
-
-def from_config(config):
-    async def __download_toc(cls, session):
-        toc_page = await utils.download_url(cls.toc_url, session)
-
-        start = toc_page.find(cls.toc_start)
-        end = toc_page.find(cls.toc_end, start)
-        toc_page = toc_page[start:end]
-
-        return [None] + re.findall(cls.toc_link, toc_page)
-
-    async def prepare_download(cls, config, session):
-        if not cls.toc:
-            cls.toc = await cls.__download_toc(session)
-
-    def get_chapter_url(cls, chapter, config):
-        return cls.chapter_url + cls.toc[chapter]
-
-    return type(
-        "AnonymusWebsite",
-        (Website,),
-        {
-            "__download_toc": classmethod(__download_toc),
-            "prepare_download": classmethod(prepare_download),
-            "get_chapter_url": classmethod(get_chapter_url),
-            "toc": [],
-            "toc_url": config["toc_url"],
-            "toc_start": config["toc_start"],
-            "toc_end": config["toc_end"],
-            "toc_link": config["toc_link"],
-            "chapter_url": config["chapter_url"],
-            "chapter_separator_start": config["chapter_start"],
-            "chapter_separator_end": config["chapter_end"],
-        },
-    )
+def from_config(config: Union[str, dict]) -> Website:
+    if isinstance(config, str):
+        return WEBSITES_DICT[config]
+    return AnonymusWebsite(config)

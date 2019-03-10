@@ -1,9 +1,9 @@
-import utils
-from . import BookConverter
-
 import os
 import re
 
+import utils
+
+from . import BookConverter
 
 _OUTPUT_DIR = "html"
 
@@ -32,7 +32,7 @@ _HTML_AFTER = """
 class HtmlConverter(BookConverter):
     name = "HTML Converter"
 
-    def process_chapter(self, ch):
+    def process_chapter(self, ch: int) -> str:
         text = self.load_chapter(ch)
         text = re.sub(
             r'<sentence class="original">.*?</sentence>', "", text, flags=re.DOTALL
@@ -40,24 +40,25 @@ class HtmlConverter(BookConverter):
         text = text.replace("</sentence>", "</sentence><br /><br />")
         text = re.sub(r"<script.*?</script>", "", text, flags=re.DOTALL)
 
-        if self.conf.get("add_chapter_titles", False):
+        if self.config.add_chapter_titles:
             text = "<strong>Chapter {}</strong><br />".format(ch) + text
 
         return text
 
-    def convert_chapters(self, chapter_start, chapter_end):
-        output_dir = utils.get_book_dir(self.book, _OUTPUT_DIR)
+    def convert_chapters(self, chapter_start: int, chapter_end: int):
+        output_dir = utils.get_book_dir(self.config.book, _OUTPUT_DIR)
         utils.ensure_dir(output_dir)
-        skip_chapters = self.conf.get("skip_chapters", [])
         progress = utils.ProgressBar(chapter_end - chapter_start + 1, "Converting")
 
         for ch in range(chapter_start, chapter_end + 1):
-            if ch in skip_chapters:
+            if ch in self.config.skip_chapters:
                 continue
             progress.update()
 
             links = {
-                "title": self.book.upper() + " &mdash; " + utils.chapter_name(ch),
+                "title": self.config.book.upper()
+                + " &mdash; "
+                + utils.chapter_name(ch),
                 "prev": utils.chapter_name(ch - 1) + ".html",
                 "nxt": utils.chapter_name(ch + 1) + ".html",
             }

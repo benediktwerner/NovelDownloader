@@ -4,3 +4,4 @@ old
 books
 dumps
 data.yml
+.mypy_cache

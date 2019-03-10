@@ -1,34 +1,30 @@
 #!/usr/bin/env python3
 
+import os
+from typing import Optional, Tuple
+
 import config
 import converters
 import utils
-import downloader
-
-import os
-
+from downloader import Downloader
 
 HELP_ACTIONS = ("?", "help")
 LIST_ACTIONS = ("l", "ls", "list")
 QUIT_ACTIONS = ("q", "quit", "exit")
 
-HELP = """\
+HELP = f"""\
 Enter a book's shortname to download or convert chapters for it.
 If no local info for the book exists it will be created.
 
 Enter nothing to select the last used book.
 
-Enter {list_actions} to list all books on this device.
-Enter {help_actions} to show this help.
-Enter {quit_actions} to quit.
-""".format(
-    list_actions=utils.format_list(LIST_ACTIONS),
-    help_actions=utils.format_list(HELP_ACTIONS),
-    quit_actions=utils.format_list(QUIT_ACTIONS),
-)
+Enter {utils.format_list(LIST_ACTIONS)} to list all books on this device.
+Enter {utils.format_list(HELP_ACTIONS)} to show this help.
+Enter {utils.format_list(QUIT_ACTIONS)} to quit.
+"""
 
 
-def choose_book():
+def choose_book() -> Optional[str]:
     print("Enter a book or '?' for help:")
 
     while True:
@@ -72,7 +68,7 @@ def choose_book():
     return book
 
 
-def download_chapters(conf):
+def download_chapters(conf: config.Config) -> Optional[Tuple[int, int]]:
     print("Which chapters do you want to download?")
 
     chapter_start = utils.input_int("First chapter? ")
@@ -80,7 +76,7 @@ def download_chapters(conf):
         "Last chapter? ", minval=chapter_start, default=chapter_start
     )
 
-    chapters_on_disk = utils.get_chapters_on_disk(conf["book"])
+    chapters_on_disk = utils.get_chapters_on_disk(conf.book)
     chapters = list(range(chapter_start, chapter_end + 1))
 
     if any(ch in chapters_on_disk for ch in chapters):
@@ -93,7 +89,7 @@ def download_chapters(conf):
                 return None
 
     try:
-        result = downloader.download_chapters(chapters, conf)
+        result = Downloader(conf).download_chapters(chapters)
         if result:
             return chapter_start, chapter_end
         return None
@@ -102,7 +98,9 @@ def download_chapters(conf):
         raise
 
 
-def convert_chapters(conf, chapter_start=None, chapter_end=None):
+def convert_chapters(
+    conf: config.Config, chapter_start: int = None, chapter_end: int = None
+):
     print("Which chapters do you want to convert?")
     if chapter_start is not None and chapter_end is not None:
         print("Enter nothing to convert the chapters just downloaded.")
@@ -111,7 +109,7 @@ def convert_chapters(conf, chapter_start=None, chapter_end=None):
     chapter_end = utils.input_int("Last chapter? ", chapter_start, default=chapter_end)
 
     chapters = set(range(chapter_start, chapter_end + 1))
-    chapters_on_disk = utils.get_chapters_on_disk(conf["book"])
+    chapters_on_disk = utils.get_chapters_on_disk(conf.book)
     missing_chapters = chapters - chapters_on_disk
 
     if missing_chapters:
@@ -122,7 +120,7 @@ def convert_chapters(conf, chapter_start=None, chapter_end=None):
         new_range = max(available_chapters, key=len)
 
         if utils.input_yes_no(
-            f"Do you want to convert {utils.format_range_list(new_range)} instead?"
+            f"Do you want to convert {utils.format_range(*new_range)} instead?"
         ):
             chapter_start, chapter_end = new_range
         else:
@@ -155,10 +153,10 @@ def main():
     if conf is None:
         return
 
-    if "name" in conf:
-        print("Selected", book, "-", conf["name"])
-    else:
+    if conf.name is None:
         print("Selected", book)
+    else:
+        print("Selected", book, "-", conf.name)
 
     chapters = utils.get_chapters_on_disk(book)
     if chapters:

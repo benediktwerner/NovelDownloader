@@ -1,10 +1,32 @@
+from typing import Any, Dict, Union
+
 import yaml
 
 import utils
 import websites
 
 
-def _get_website():
+class Config:
+    def __init__(self, book: str, values: Dict[str, str]):
+        self.book = book
+
+        website = values.get("website")
+        if website is None:
+            self.website = websites.WEBSITES[0]
+            print("Warning: Config has no 'website' attribute")
+            print(f"         Assuming '{self.website.name}'")
+        elif isinstance(website, str) or isinstance(website, dict):
+            self.website = websites.from_config(website)
+        else:
+            raise ValueError(f"Invalid 'website' type {type(values['website'])}")
+
+        self.book_id = values["book_id"]
+        self.name = values.get("name")
+        self.add_chapter_titles = values.get("add_chapter_titles", False)
+        self.skip_chapters = values.get("skip_chapters", [])
+
+
+def _get_website() -> Union[str, Dict[str, str]]:
     print("[0] Custom")
     for i, website in enumerate(websites.WEBSITES, 1):
         print("[{}] {}".format(i, website.name))
@@ -24,8 +46,8 @@ def _get_website():
     }
 
 
-def create_config(book):
-    config = {}
+def create_config(book: str):
+    config: Dict[str, Any] = {}
 
     print("Creating new config for {}:".format(book))
     config["website"] = _get_website()
@@ -47,23 +69,8 @@ def create_config(book):
     print()
 
 
-def load_config(book):
+def load_config(book: str) -> Config:
     with open(utils.get_config_file(book)) as f:
-        config = yaml.load(f)
+        values = yaml.load(f)
 
-    if "website" not in config:
-        print("Warning: Config has no 'website' attribute")
-        print("         Assuming 'wuxiaworld'")
-    elif isinstance(config["website"], str):
-        config["website"] = websites.from_name(config["website"])
-    elif isinstance(config["website"], dict):
-        config["website"] = websites.from_config(config["website"])
-    else:
-        print("Error: Config has an invalid 'website' attribute")
-        print("       of type", type(config["website"]))
-        print("       A valid value is either the name of a supported website")
-        print("       or a dictionary declaring a custom website")
-        return None
-
-    config["book"] = book
-    return config
+    return Config(book, values)
