@@ -20,7 +20,7 @@ TOC_END = '<div id="sidebar'
 class Wuxiaworld(Website):
     name = "wuxiaworld"
 
-    chapter_separator_start = '<div class="fr-view">'
+    chapter_separator_start = '<div id="chapter-content" class="fr-view">'
     chapter_separator_end = '<a href="/novel/'
 
     tocs: Dict[str, Dict[int, str]] = {}
