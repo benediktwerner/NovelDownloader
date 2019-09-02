@@ -107,7 +107,7 @@ def chapter_name(chapter: int) -> str:
 def load_data() -> Optional[dict]:
     if os.path.isfile(DATA_FILE):
         with open(DATA_FILE) as f:
-            return yaml.load(f)
+            return yaml.safe_load(f)
     return None
 
 

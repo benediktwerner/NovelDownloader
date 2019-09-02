@@ -58,6 +58,6 @@ def create_config(book: str):
 
 def load_config(book: str) -> Config:
     with open(utils.get_config_file(book)) as f:
-        values = yaml.load(f)
+        values = yaml.safe_load(f)
 
     return Config(book, values)
