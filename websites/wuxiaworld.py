@@ -41,7 +41,7 @@ class Wuxiaworld(Website):
         toc_page = toc_page[start:end]
 
         toc = {}
-        for ch, url in re.findall('"(/novel/.*?)"', toc_page):
+        for ch, url in enumerate(re.findall('"(/novel/.*?)"', toc_page), 1):
             toc[ch] = url
 
         return toc
