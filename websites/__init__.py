@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Type, Union
 
 from aiohttp import ClientSession
 
@@ -14,6 +14,10 @@ class Website(ABC):
     name: str
     chapter_separator_start: str
     chapter_separator_end: str
+
+    @staticmethod
+    def create_config() -> dict:
+        return {}
 
     @abstractmethod
     def get_chapter_url(self, chapter: int, config: config.Config) -> str:

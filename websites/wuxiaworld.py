@@ -25,6 +25,12 @@ class Wuxiaworld(Website):
 
     tocs: Dict[str, Dict[int, str]] = {}
 
+    @staticmethod
+    def create_config() -> dict:
+        return {
+            "book_id": input("Book id? ")
+        }
+
     async def __download_toc(
         self, book_id: str, session: ClientSession
     ) -> Dict[int, str]:

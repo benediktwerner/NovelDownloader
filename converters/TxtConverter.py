@@ -31,12 +31,10 @@ class TxtConverter(BookConverter):
             f.write("{}\n\n\n".format(title).encode())
 
             for ch in range(chapter_start, chapter_end + 1):
-                if ch in self.config.skip_chapters:
-                    continue
-
                 progress.update()
-                if self.config.add_chapter_titles:
-                    f.write("Chapter {}\n\n".format(ch).encode())
+
+                # if self.config.add_chapter_titles:
+                #     f.write("Chapter {}\n\n".format(ch).encode())
                 f.write(self.process_chapter(ch).encode())
 
                 if ch != chapter_end:
