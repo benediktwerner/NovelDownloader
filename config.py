@@ -11,7 +11,7 @@ class Config:
         self.book = book
         self.website = websites.from_config(values["website"])
         self.values = values
-    
+
     def __getattr__(self, name):
         return self.values.get(name)
 
