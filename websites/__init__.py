@@ -77,8 +77,9 @@ class AnonymusWebsite(Website):
 
 from .qidian import Qidian
 from .wuxiaworld import Wuxiaworld
+from .lnmtl import Lnmtl
 
-WEBSITES = [Wuxiaworld(), Qidian()]
+WEBSITES = [Wuxiaworld(), Qidian(), Lnmtl()]
 
 WEBSITES_DICT: Dict[str, Website] = {}
 
