@@ -39,6 +39,7 @@ class HtmlConverter(BookConverter):
         )
         text = text.replace("</sentence>", "</sentence><br /><br />")
         text = re.sub(r"<script.*?</script>", "", text, flags=re.DOTALL)
+        text = re.sub(r"<pirate>.*?</pirate>", "", text, flags=re.DOTALL)
 
         # if self.config.add_chapter_titles:
         #     text = "<strong>Chapter {}</strong><br />".format(ch) + text

@@ -87,7 +87,8 @@ class Qidian(Website):
 
         chapter_index = content["data"]["chapterInfo"]["chapterIndex"]
         chapter_name = content["data"]["chapterInfo"]["chapterName"]
-        chapter_content = content["data"]["chapterInfo"]["content"]
+        chapter_paragraphs = content["data"]["chapterInfo"]["contents"]
+        chapter_content = "\n".join(p["content"] for p in chapter_paragraphs)
 
         chapter_title = (
             f"<strong>Chapter {chapter_index}: {chapter_name}</strong><br />"
